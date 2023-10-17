@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Value;
 import pl.borek497.bookstore.catalog.domain.Book;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,7 @@ public interface CatalogUseCase {
         String title;
         String author;
         Integer year;
+        BigDecimal price;
     }
 
     @Value
