@@ -9,6 +9,7 @@ import pl.borek497.bookstore.catalog.application.port.CatalogUseCase.UpdateBookC
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase.UpdateBookResponse;
 import pl.borek497.bookstore.catalog.domain.Book;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -27,9 +28,17 @@ public class ApplicationStartup implements CommandLineRunner {
     @Override
     public void run(String... args) {
         initData();
+        searchCatalog();
+    }
+
+    private void searchCatalog() {
         findByTitle();
         findAndUpdate();
         findByTitle();
+    }
+
+    private void placeOrder() {
+
     }
 
     private void findAndUpdate() {
@@ -47,9 +56,9 @@ public class ApplicationStartup implements CommandLineRunner {
     }
 
     private void initData() {
-        catalogUseCase.addBook(new CreateBookCommand("Pan Tadeusz", "Adam Mickiewicz", 1897));
-        catalogUseCase.addBook(new CreateBookCommand("Ogniem i mieczem", "Henryk Sienkiewicz", 1898));
-        catalogUseCase.addBook(new CreateBookCommand("Harry Potter i Komnata tajemnic", "J.R.R. Rownling", 1999));
+        catalogUseCase.addBook(new CreateBookCommand("Pan Tadeusz", "Adam Mickiewicz", 1897, new BigDecimal(10.99)));
+        catalogUseCase.addBook(new CreateBookCommand("Ogniem i mieczem", "Henryk Sienkiewicz", 1898, new BigDecimal(12.99)));
+        catalogUseCase.addBook(new CreateBookCommand("Harry Potter i Komnata tajemnic", "J.R.R. Rownling", 1999, new BigDecimal(14.99)));
     }
 
     private void findByTitle() {
