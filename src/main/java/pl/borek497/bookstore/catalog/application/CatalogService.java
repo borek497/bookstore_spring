@@ -26,6 +26,14 @@ class CatalogService implements CatalogUseCase {
     }
 
     @Override
+    public Optional<Book> findOneByTitle(String title) {
+        return catalogRepository.findAll()
+                .stream()
+                .filter(book -> book.getTitle().contains(title))
+                .findFirst();
+    }
+
+    @Override
     public List<Book> findAll() {
         return catalogRepository.findAll();
     }
@@ -41,8 +49,7 @@ class CatalogService implements CatalogUseCase {
 
     @Override
     public void addBook(CreateBookCommand createBookCommand) {
-        Book book = new Book(createBookCommand.getTitle(), createBookCommand.getAuthor(), createBookCommand.getYear(),
-                createBookCommand.getPrice());
+        Book book = createBookCommand.toBook();
         catalogRepository.save(book);
     }
 

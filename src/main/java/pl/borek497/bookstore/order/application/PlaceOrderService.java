@@ -1,13 +1,13 @@
 package pl.borek497.bookstore.order.application;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.borek497.bookstore.order.application.port.PlaceOrderUseCase;
 import pl.borek497.bookstore.order.domain.Order;
 import pl.borek497.bookstore.order.domain.OrderRepository;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 class PlaceOrderService implements PlaceOrderUseCase {
 
     private OrderRepository repository;

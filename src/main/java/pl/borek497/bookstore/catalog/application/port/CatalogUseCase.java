@@ -13,6 +13,7 @@ import static java.util.Collections.emptyList;
 public interface CatalogUseCase {
 
     List<Book> findByTitle(String title);
+    Optional<Book> findOneByTitle(String title);
 
     List<Book> findAll();
 
@@ -30,6 +31,10 @@ public interface CatalogUseCase {
         String author;
         Integer year;
         BigDecimal price;
+
+        public Book toBook() {
+            return new Book(title, author, year, price);
+        }
     }
 
     @Value
