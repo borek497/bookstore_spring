@@ -44,6 +44,13 @@ public class ApplicationStartup implements CommandLineRunner {
         placeOrder();
     }
 
+    private void initData() {
+        catalogUseCase.addBook(new CreateBookCommand("Pan Tadeusz", "Adam Mickiewicz", 1897, BigDecimal.valueOf(10.99)));
+        catalogUseCase.addBook(new CreateBookCommand("Ogniem i mieczem", "Henryk Sienkiewicz", 1898, BigDecimal.valueOf(12.99)));
+        catalogUseCase.addBook(new CreateBookCommand("Harry Potter i Komnata tajemnic", "J.R.R. Rownling", 1999, BigDecimal.valueOf(14.99)));
+        catalogUseCase.addBook(new CreateBookCommand("Chłopi", "Władysław Reymont", 1777, BigDecimal.valueOf(44.99)));
+    }
+
     private void searchCatalog() {
         findByTitle();
         findAndUpdate();
@@ -51,13 +58,8 @@ public class ApplicationStartup implements CommandLineRunner {
     }
 
     private void placeOrder() {
-        //find pan Tadeusz
         Book panTadeusz = catalogUseCase.findOneByTitle("Pan Tadeusz").orElseThrow(() -> new IllegalStateException("Cannot find a book"));
-
-        //find chlopi
         Book chlopi = catalogUseCase.findOneByTitle("Chłopi").orElseThrow(() -> new IllegalStateException("Cannot find a book"));
-
-        //create recipient
 
         Recipient recipient = Recipient
                 .builder()
@@ -69,8 +71,6 @@ public class ApplicationStartup implements CommandLineRunner {
                 .email("jan@ms.com")
                 .build();
 
-
-        //place order command
         PlaceOrderCommand command = PlaceOrderCommand
                 .builder()
                 .recipient(recipient)
@@ -81,10 +81,8 @@ public class ApplicationStartup implements CommandLineRunner {
         PlaceOrderResponse placeOrderResponse = placeOrderUseCase.placeOrder(command);
         System.out.println("Created order with id: " + placeOrderResponse.getOrderId());
 
-        //list all orders
         queryOrderUseCase.findAll()
                 .forEach(order -> System.out.println("Got order with total price: " + order.totalPrice() + " details: " + order));
-
     }
 
     private void findAndUpdate() {
@@ -99,13 +97,6 @@ public class ApplicationStartup implements CommandLineRunner {
                     UpdateBookResponse response =  catalogUseCase.updateBook(updateBookCommand);
                     System.out.println("Updating book result: " + response.isSuccess());
                 });
-    }
-
-    private void initData() {
-        catalogUseCase.addBook(new CreateBookCommand("Pan Tadeusz", "Adam Mickiewicz", 1897, BigDecimal.valueOf(10.99)));
-        catalogUseCase.addBook(new CreateBookCommand("Ogniem i mieczem", "Henryk Sienkiewicz", 1898, BigDecimal.valueOf(12.99)));
-        catalogUseCase.addBook(new CreateBookCommand("Harry Potter i Komnata tajemnic", "J.R.R. Rownling", 1999, BigDecimal.valueOf(14.99)));
-        catalogUseCase.addBook(new CreateBookCommand("Chłopi", "Władysław Reymont", 1777, BigDecimal.valueOf(44.99)));
     }
 
     private void findByTitle() {
