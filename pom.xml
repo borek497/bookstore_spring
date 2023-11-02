@@ -19,6 +19,7 @@
 		<java.version>17</java.version>
 		<lombok.version>1.18.30</lombok.version>
 		<hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
+		<commons.lang.version>3.12.0</commons.lang.version>
 	</properties>
 
 	<dependencies>
@@ -45,6 +46,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons.lang.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase;
 import pl.borek497.bookstore.catalog.domain.Book;
 import pl.borek497.bookstore.catalog.domain.CatalogRepository;
+import pl.borek497.bookstore.uploads.application.ports.UploadUseCase;
+import pl.borek497.bookstore.uploads.application.ports.UploadUseCase.SaveUploadCommand;
+import pl.borek497.bookstore.uploads.domain.Upload;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 class CatalogService implements CatalogUseCase {
 
     private final CatalogRepository catalogRepository;
+    private final UploadUseCase uploadUseCase;
 
     @Override
     public List<Book> findByTitle(String title) {
@@ -91,5 +95,18 @@ class CatalogService implements CatalogUseCase {
                     return UpdateBookResponse.SUCCESS;
                 })
                 .orElseGet(() -> new UpdateBookResponse(false, Arrays.asList("Book not found with id: " + updateBookCommand.getId())));
+    }
+
+    @Override
+    public void updateBookCover(UpdateBookCoverCommand updateBookCoverCommand) {
+        catalogRepository.findById(updateBookCoverCommand.getId())
+                .ifPresent(book -> {
+                    Upload savedUpload = uploadUseCase.save(new SaveUploadCommand(
+                            updateBookCoverCommand.getFileName(),
+                            updateBookCoverCommand.getFile(),
+                            updateBookCoverCommand.getContentType()));
+                    book.setCoverId(savedUpload.getId());
+                    catalogRepository.save(book);
+                });
     }
 }
