@@ -1,5 +1,6 @@
 package pl.borek497.bookstore.catalog.application.port;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 import pl.borek497.bookstore.catalog.domain.Book;
@@ -12,14 +13,15 @@ import static java.util.Collections.emptyList;
 
 public interface CatalogUseCase {
 
+    List<Book> findAll();
+    Optional<Book> findById(Long id);
     List<Book> findByTitle(String title);
     Optional<Book> findOneByTitle(String title);
-
-    List<Book> findAll();
-
+    List<Book> findByAuthor(String author);
+    List<Book> findByTitleAndAuthor(String title, String author);
     Optional<Book> findOneByTitleAndAuthor(String title, String author);
 
-    void addBook(CreateBookCommand createBookCommand);
+    Book addBook(CreateBookCommand createBookCommand);
 
     void removeById(Long id);
 
@@ -39,11 +41,13 @@ public interface CatalogUseCase {
 
     @Value
     @Builder
+    @AllArgsConstructor
     class UpdateBookCommand {
         Long id;
         String title;
         String author;
         Integer year;
+        BigDecimal price;
 
         public Book updateFields(Book book) {
             if (title != null) {
@@ -56,6 +60,10 @@ public interface CatalogUseCase {
 
             if (year != null) {
                 book.setYear(year);
+            }
+
+            if (price != null) {
+                book.setPrice(price);
             }
 
             return book;
