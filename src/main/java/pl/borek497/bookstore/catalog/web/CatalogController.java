@@ -94,6 +94,12 @@ class CatalogController {
                 file.getOriginalFilename()));
     }
 
+    @DeleteMapping("/{id}/cover")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeBookCover(@PathVariable Long id) {
+        catalogUseCase.removeBookCover(id);
+    }
+
     @Data
     private static class RestBookCommand {
         @NotBlank(message = "Please provide a title")

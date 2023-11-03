@@ -11,6 +11,8 @@ public interface UploadUseCase {
     Upload save(SaveUploadCommand saveUploadCommand);
     Optional<Upload> getById(String id);
 
+    void removeById(String id);
+
     @AllArgsConstructor
     @Data
     class SaveUploadCommand {
