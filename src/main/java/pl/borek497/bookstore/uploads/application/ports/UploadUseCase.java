@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import pl.borek497.bookstore.uploads.domain.Upload;
 
+import java.util.Optional;
+
 public interface UploadUseCase {
 
     Upload save(SaveUploadCommand saveUploadCommand);
+    Optional<Upload> getById(String id);
 
     @AllArgsConstructor
     @Data
