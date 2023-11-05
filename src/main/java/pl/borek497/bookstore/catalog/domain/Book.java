@@ -1,14 +1,22 @@
 package pl.borek497.bookstore.catalog.domain;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 
 import java.math.BigDecimal;
+import jakarta.persistence.Entity;
 
-@RequiredArgsConstructor
+
 @ToString
 @Getter
 @Setter
+@RequiredArgsConstructor
+@Entity
 public class Book {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String title;
     private String author;

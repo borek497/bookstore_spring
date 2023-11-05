@@ -31,6 +31,16 @@ public interface CatalogUseCase {
 
     void removeBookCover(Long id);
 
+    /**
+     * Command to taki wrapper, takie opakowanie na pozostałe parametry
+     * Takie klasy opakowujące możemy stworzyć albo w port, albo w interfejs.
+     * Lepiej tworzyć takie klasy w interfejsie, mają bardzo krótki cykl życia, są tworzone na chwile, zaraz są niszczone.
+     * Nie ma co zaśmiecac pakietu port klasami, które będą żyły chwile.
+     *
+     * @Value to taka adnotacja z lombooka, która sprawa, że pola są finalne i prywatne oraz mamy gotowy specjalny konstruktor
+     * oraz gettery, settery, toString()
+     */
+
     @Value
     class UpdateBookCoverCommand {
         Long id;

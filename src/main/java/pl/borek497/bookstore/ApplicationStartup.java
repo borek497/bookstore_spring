@@ -8,9 +8,9 @@ import pl.borek497.bookstore.catalog.application.port.CatalogUseCase.CreateBookC
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase.UpdateBookCommand;
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase.UpdateBookResponse;
 import pl.borek497.bookstore.catalog.domain.Book;
-import pl.borek497.bookstore.order.application.port.PlaceOrderUseCase;
-import pl.borek497.bookstore.order.application.port.PlaceOrderUseCase.PlaceOrderCommand;
-import pl.borek497.bookstore.order.application.port.PlaceOrderUseCase.PlaceOrderResponse;
+import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase;
+import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderCommand;
+import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderResponse;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
 import pl.borek497.bookstore.order.domain.OrderItem;
 import pl.borek497.bookstore.order.domain.Recipient;
@@ -22,17 +22,17 @@ import java.util.List;
 public class ApplicationStartup implements CommandLineRunner {
 
     private final CatalogUseCase catalogUseCase;
-    private final PlaceOrderUseCase placeOrderUseCase;
+    private final ManipulateOrderUseCase manipulateOrderUseCase;
     private final QueryOrderUseCase queryOrderUseCase;
     private final String title;
 
     public ApplicationStartup(
             CatalogUseCase catalogUseCase,
-            PlaceOrderUseCase placeOrderUseCase,
+            ManipulateOrderUseCase manipulateOrderUseCase,
             QueryOrderUseCase queryOrderUseCase,
             @Value("${bookstore.catalog.query}") String title) {
         this.catalogUseCase = catalogUseCase;
-        this.placeOrderUseCase = placeOrderUseCase;
+        this.manipulateOrderUseCase = manipulateOrderUseCase;
         this.queryOrderUseCase = queryOrderUseCase;
         this.title = title;
     }
@@ -45,16 +45,19 @@ public class ApplicationStartup implements CommandLineRunner {
     }
 
     private void initData() {
-        catalogUseCase.addBook(new CreateBookCommand("Pan Tadeusz", "Adam Mickiewicz", 1897, BigDecimal.valueOf(10.99)));
-        catalogUseCase.addBook(new CreateBookCommand("Ogniem i mieczem", "Henryk Sienkiewicz", 1898, BigDecimal.valueOf(12.99)));
-        catalogUseCase.addBook(new CreateBookCommand("Harry Potter i Komnata tajemnic", "J.R.R. Rownling", 1999, BigDecimal.valueOf(14.99)));
-        catalogUseCase.addBook(new CreateBookCommand("Chłopi", "Władysław Reymont", 1777, BigDecimal.valueOf(44.99)));
+        catalogUseCase.addBook(new CreateBookCommand("Pan Tadeusz", "Adam Mickiewicz", 1834, new BigDecimal("19.90")));
+        catalogUseCase.addBook(new CreateBookCommand("Ogniem i Mieczem", "Henryk Sienkiewicz", 1884, new BigDecimal("29.90")));
+        catalogUseCase.addBook(new CreateBookCommand("Chłopi", "Władysław Reymont", 1904, new BigDecimal("11.90")));
+        catalogUseCase.addBook(new CreateBookCommand("Pan Wołodyjowski", "Henryk Sienkiewicz", 1834, new BigDecimal("14.90")));
+        catalogUseCase.addBook(new CreateBookCommand("Harry Potter i Kamień filozoficzny", "J.R. Rowlling", 1998, new BigDecimal("14.90")));
+        catalogUseCase.addBook(new CreateBookCommand("Harry Potter i Komnata tajemnic", "J.R. Rowlling", 2001, new BigDecimal("14.90")));
+        catalogUseCase.addBook(new CreateBookCommand("Harry Potter i Czara ognia", "J.R. Rowlling", 2004, new BigDecimal("14.90")));
     }
 
     private void searchCatalog() {
-        findByTitle();
-        findAndUpdate();
-        findByTitle();
+//        findByTitle();
+//        findAndUpdate();
+//        findByTitle();
     }
 
     private void placeOrder() {
@@ -74,12 +77,16 @@ public class ApplicationStartup implements CommandLineRunner {
         PlaceOrderCommand command = PlaceOrderCommand
                 .builder()
                 .recipient(recipient)
-                .item(new OrderItem(panTadeusz, 16))
-                .item(new OrderItem(chlopi, 7))
+                .item(new OrderItem(panTadeusz.getId(), 16))
+                .item(new OrderItem(chlopi.getId(), 7))
                 .build();
 
-        PlaceOrderResponse placeOrderResponse = placeOrderUseCase.placeOrder(command);
-        System.out.println("Created order with id: " + placeOrderResponse.getOrderId());
+        PlaceOrderResponse placeOrderResponse = manipulateOrderUseCase.placeOrder(command);
+        String result = placeOrderResponse.handle(
+                orderId -> "Created ORDER with id: " + orderId,
+                error -> "Failed to created order: " + error
+        );
+        System.out.println(result);
 
         queryOrderUseCase.findAll()
                 .forEach(order -> System.out.println("Got order with total price: " + order.totalPrice() + " details: " + order));
