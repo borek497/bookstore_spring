@@ -1,41 +1,41 @@
 package pl.borek497.bookstore.uploads.application;
 
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import pl.borek497.bookstore.uploads.application.ports.UploadUseCase;
+import pl.borek497.bookstore.uploads.db.UploadJpaRepository;
 import pl.borek497.bookstore.uploads.domain.Upload;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@AllArgsConstructor
 class UploadService implements UploadUseCase {
-    private final Map<String, Upload> storage = new ConcurrentHashMap<>();
+    private final UploadJpaRepository uploadJpaRepository;
 
     @Override
     public Upload save(SaveUploadCommand saveUploadCommand) {
-        String newId = RandomStringUtils.randomAlphabetic(8).toLowerCase();
+
         Upload upload = new Upload(
-                newId,
-                saveUploadCommand.getFile(),
-                saveUploadCommand.getContentType(),
                 saveUploadCommand.getFileName(),
-                LocalDateTime.now()
+                saveUploadCommand.getContentType(),
+                saveUploadCommand.getFile()
         );
-        storage.put(upload.getId(), upload);
-        System.out.println("Upload saved: " + upload.getFileName() + " with id: " + newId);
+
+        uploadJpaRepository.save(upload);
+        System.out.println("Upload saved: " + upload.getFileName() + " with id: " + upload.getId());
         return upload;
     }
 
     @Override
-    public Optional<Upload> getById(String id) {
-        return Optional.ofNullable(storage.get(id));
+    public Optional<Upload> getById(Long id) {
+        return uploadJpaRepository.findById(id);
     }
 
     @Override
-    public void removeById(String id) {
-        storage.remove(id);
+    public void removeById(Long id) {
+        uploadJpaRepository.deleteById(id);
     }
 }

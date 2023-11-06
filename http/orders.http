@@ -1,0 +1,9 @@
+GET http://localhost:8080/orders/1
+
+###
+PUT http://localhost:8080/orders/1/status
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED"
+}

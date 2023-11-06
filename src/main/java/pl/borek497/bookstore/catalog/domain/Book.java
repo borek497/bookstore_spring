@@ -16,13 +16,13 @@ import jakarta.persistence.Entity;
 @Entity
 public class Book {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private Long id;
     private String title;
     private String author;
     private Integer year;
     private BigDecimal price;
-    private String coverId;
+    private Long coverId;
 
     public Book(String title, String author, Integer year, BigDecimal price) {
         this.title = title;
