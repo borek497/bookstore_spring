@@ -1,12 +1,14 @@
 package pl.borek497.bookstore.catalog.domain;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import jakarta.persistence.Entity;
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @ToString
@@ -14,6 +16,7 @@ import jakarta.persistence.Entity;
 @Setter
 @RequiredArgsConstructor
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Book {
     @Id
     @GeneratedValue
@@ -23,6 +26,10 @@ public class Book {
     private Integer year;
     private BigDecimal price;
     private Long coverId;
+    @CreatedDate
+    private LocalDateTime createdAt;
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
     public Book(String title, String author, Integer year, BigDecimal price) {
         this.title = title;
