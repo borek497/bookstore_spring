@@ -28,7 +28,9 @@ public class Order {
     @JoinColumn(name = "order_id")
     private List<OrderItem> items;
 
+    @ManyToOne(cascade = CascadeType.ALL)
     private Recipient recipient;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private OrderStatus status = OrderStatus.NEW;

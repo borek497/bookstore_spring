@@ -8,6 +8,7 @@ import pl.borek497.bookstore.catalog.domain.Book;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
 
@@ -52,13 +53,9 @@ public interface CatalogUseCase {
     @Value
     class CreateBookCommand {
         String title;
-        String author;
+        Set<Long> authors;
         Integer year;
         BigDecimal price;
-
-        public Book toBook() {
-            return new Book(title, author, year, price);
-        }
     }
 
     @Value
@@ -67,7 +64,7 @@ public interface CatalogUseCase {
     class UpdateBookCommand {
         Long id;
         String title;
-        String author;
+        Set<Long> authors;
         Integer year;
         BigDecimal price;
 
@@ -76,9 +73,9 @@ public interface CatalogUseCase {
                 book.setTitle(title);
             }
 
-            if (author != null) {
-                book.setAuthor(author);
-            }
+//            if (author != null) {
+//                book.setAuthor(author);
+//            }
 
             if (year != null) {
                 book.setYear(year);
