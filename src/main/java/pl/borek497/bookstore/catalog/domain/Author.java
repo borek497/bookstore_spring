@@ -1,5 +1,6 @@
 package pl.borek497.bookstore.catalog.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class Author {
     private String lastName;
 
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "authors")
+    @JsonIgnoreProperties("authors")
     private Set<Book> books;
 
     @CreatedDate

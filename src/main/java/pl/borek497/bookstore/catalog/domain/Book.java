@@ -1,5 +1,6 @@
 package pl.borek497.bookstore.catalog.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +34,7 @@ public class Book {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable
+    @JsonIgnoreProperties("books")
     private Set<Author> authors;
 
     public Book(String title, Integer year, BigDecimal price) {
