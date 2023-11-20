@@ -85,14 +85,18 @@ class CatalogService implements CatalogUseCase {
 
     private Book toBook(CreateBookCommand createBookCommand) {
         Book book = new Book(createBookCommand.getTitle(), createBookCommand.getYear(), createBookCommand.getPrice());
-        Set<Author> authors = createBookCommand.getAuthors().stream()
-                .map(authorId ->
-                    authorJpaRepository
-                            .findById(authorId)
-                            .orElseThrow(() -> new IllegalArgumentException("Unable to find author with id: " + authorId))
-                ).collect(Collectors.toSet());
+        Set<Author> authors = fetchAuthorsByIds(createBookCommand.getAuthors());
         book.setAuthors(authors);
         return book;
+    }
+
+    private Set<Author> fetchAuthorsByIds(Set<Long> authors) {
+        return authors.stream()
+                .map(authorId ->
+                        authorJpaRepository
+                                .findById(authorId)
+                                .orElseThrow(() -> new IllegalArgumentException("Unable to find author with id: " + authorId))
+                ).collect(Collectors.toSet());
     }
 
     @Override
@@ -106,11 +110,27 @@ class CatalogService implements CatalogUseCase {
         return bookJpaRepository
                 .findById(updateBookCommand.getId())
                 .map(book -> {
-                    Book updatedBook = updateBookCommand.updateFields(book);
+                    Book updatedBook = updateFields(updateBookCommand, book);
                     bookJpaRepository.save(updatedBook);
                     return UpdateBookResponse.SUCCESS;
                 })
                 .orElseGet(() -> new UpdateBookResponse(false, Arrays.asList("Book not found with id: " + updateBookCommand.getId())));
+    }
+
+    private Book updateFields(UpdateBookCommand updateBookCommand, Book book) {
+        if (updateBookCommand.getTitle() != null) {
+            book.setTitle(updateBookCommand.getTitle());
+        }
+        if (updateBookCommand.getAuthors() != null && updateBookCommand.getAuthors().size() > 0) {
+            book.setAuthors(fetchAuthorsByIds(updateBookCommand.getAuthors()));
+        }
+        if (updateBookCommand.getYear() != null) {
+            book.setYear(updateBookCommand.getYear());
+        }
+        if (updateBookCommand.getPrice() != null) {
+            book.setPrice(updateBookCommand.getPrice());
+        }
+        return book;
     }
 
     @Override
