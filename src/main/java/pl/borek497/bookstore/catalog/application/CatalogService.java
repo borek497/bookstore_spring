@@ -27,10 +27,7 @@ class CatalogService implements CatalogUseCase {
 
     @Override
     public List<Book> findByTitle(String title) {
-        return bookJpaRepository.findAll()
-                .stream()
-                .filter(book -> book.getTitle().toLowerCase().contains(title.toLowerCase()))
-                .collect(Collectors.toList());
+        return bookJpaRepository.findByTitleStartsWithIgnoreCase(title);
     }
 
     @Override
@@ -48,10 +45,7 @@ class CatalogService implements CatalogUseCase {
 
     @Override
     public List<Book> findByAuthor(String author) {
-        return bookJpaRepository.findAll()
-                .stream()
-                //.filter(book -> book.getAuthor().toLowerCase().contains(author.toLowerCase()))
-                .collect(Collectors.toList());
+        return bookJpaRepository.findByAuthors_firstNameContainsIgnoreCaseOrAuthors_lastNameContainingIgnoreCase(author, author);
     }
 
     @Override
@@ -69,15 +63,6 @@ class CatalogService implements CatalogUseCase {
     }
 
     @Override
-    public Optional<Book> findOneByTitleAndAuthor(String title, String author) {
-        return bookJpaRepository.findAll()
-                .stream()
-                .filter(book -> book.getTitle().startsWith(title))
-                //.filter(book -> book.getAuthor().startsWith(author))
-                .findFirst();
-    }
-
-    @Override
     public Book addBook(CreateBookCommand createBookCommand) {
         Book book = toBook(createBookCommand);
         return bookJpaRepository.save(book);
@@ -86,8 +71,13 @@ class CatalogService implements CatalogUseCase {
     private Book toBook(CreateBookCommand createBookCommand) {
         Book book = new Book(createBookCommand.getTitle(), createBookCommand.getYear(), createBookCommand.getPrice());
         Set<Author> authors = fetchAuthorsByIds(createBookCommand.getAuthors());
-        book.setAuthors(authors);
+        updateBooks(book, authors);
         return book;
+    }
+
+    private static void updateBooks(Book book, Set<Author> authors) {
+        book.removeAuthors();
+        authors.forEach(book::addAuthor);
     }
 
     private Set<Author> fetchAuthorsByIds(Set<Long> authors) {
@@ -122,7 +112,7 @@ class CatalogService implements CatalogUseCase {
             book.setTitle(updateBookCommand.getTitle());
         }
         if (updateBookCommand.getAuthors() != null && updateBookCommand.getAuthors().size() > 0) {
-            book.setAuthors(fetchAuthorsByIds(updateBookCommand.getAuthors()));
+            updateBooks(book, fetchAuthorsByIds(updateBookCommand.getAuthors()));
         }
         if (updateBookCommand.getYear() != null) {
             book.setYear(updateBookCommand.getYear());
