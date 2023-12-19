@@ -1,5 +1,6 @@
 package pl.borek497.bookstore.catalog.application;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase;
@@ -63,6 +64,7 @@ class CatalogService implements CatalogUseCase {
     }
 
     @Override
+    @Transactional
     public Book addBook(CreateBookCommand createBookCommand) {
         Book book = toBook(createBookCommand);
         return bookJpaRepository.save(book);

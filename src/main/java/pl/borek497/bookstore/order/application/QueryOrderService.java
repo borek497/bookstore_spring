@@ -1,5 +1,6 @@
 package pl.borek497.bookstore.order.application;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.borek497.bookstore.catalog.db.BookJpaRepository;
@@ -20,6 +21,7 @@ class QueryOrderService implements QueryOrderUseCase {
     private final BookJpaRepository bookJpaRepository;
 
     @Override
+    @Transactional
     public List<RichOrder> findAll() {
         return orderJpaRepository.findAll()
                 .stream()
