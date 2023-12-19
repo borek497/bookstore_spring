@@ -1,24 +1,19 @@
 package pl.borek497.bookstore.order.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import pl.borek497.bookstore.jpa.BaseEntity;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-public class OrderItem {
+@AllArgsConstructor
+public class OrderItem extends BaseEntity {
 
-    @Id
-    @GeneratedValue
-    private Long id;
     private Long bookId;
     private int quantity;
-
-    public OrderItem(Long bookId, int quantity) {
-        this.bookId = bookId;
-        this.quantity = quantity;
-    }
 }
