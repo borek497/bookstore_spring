@@ -98,12 +98,12 @@ class CatalogService implements CatalogUseCase {
     }
 
     @Override
+    @Transactional
     public UpdateBookResponse updateBook(UpdateBookCommand updateBookCommand) {
         return bookJpaRepository
                 .findById(updateBookCommand.getId())
                 .map(book -> {
-                    Book updatedBook = updateFields(updateBookCommand, book);
-                    bookJpaRepository.save(updatedBook);
+                    updateFields(updateBookCommand, book);
                     return UpdateBookResponse.SUCCESS;
                 })
                 .orElseGet(() -> new UpdateBookResponse(false, Arrays.asList("Book not found with id: " + updateBookCommand.getId())));
