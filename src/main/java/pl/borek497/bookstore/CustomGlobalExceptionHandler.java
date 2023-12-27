@@ -17,19 +17,24 @@ class CustomGlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleException(MethodArgumentNotValidException exception) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        body.put("timestamp", new Date());
-        body.put("status", status.value());
-
-        //GetAllErrors
         List<String> errors = exception
                 .getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(x -> x.getField() + " - " + x.getDefaultMessage())
                 .collect(Collectors.toList());
+        return handleError(HttpStatus.BAD_REQUEST, errors);
+    }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handle(IllegalArgumentException exception) {
+        return handleError(HttpStatus.BAD_REQUEST, List.of(exception.getMessage()));
+    }
+
+    private static ResponseEntity<Object> handleError(HttpStatus status, List<String> errors) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", new Date());
+        body.put("status", status.value());
         body.put("errors", errors);
         return new ResponseEntity<>(body, status);
     }

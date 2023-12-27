@@ -34,7 +34,7 @@ class ManipulateOrderService implements ManipulateOrderUseCase {
     public void updateOrderStatus(Long id, OrderStatus status) {
         orderJpaRepository.findById(id)
                 .ifPresent(order -> {
-                    order.setStatus(status);
+                    order.updateStatus(status);
                     orderJpaRepository.save(order);
                 });
     }
