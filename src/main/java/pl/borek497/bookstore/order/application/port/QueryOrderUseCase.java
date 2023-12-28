@@ -2,6 +2,7 @@ package pl.borek497.bookstore.order.application.port;
 
 import lombok.Value;
 import pl.borek497.bookstore.catalog.domain.Book;
+import pl.borek497.bookstore.order.domain.OrderItem;
 import pl.borek497.bookstore.order.domain.OrderStatus;
 import pl.borek497.bookstore.order.domain.Recipient;
 
@@ -9,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface QueryOrderUseCase {
 
@@ -22,7 +24,7 @@ public interface QueryOrderUseCase {
     class RichOrder {
         Long id;
         OrderStatus status;
-        List<RichOrderItem> items;
+        Set<OrderItem> items;
         Recipient recipient;
         LocalDateTime createdAt;
 
@@ -31,11 +33,5 @@ public interface QueryOrderUseCase {
                     .map(item -> item.getBook().getPrice().multiply(new BigDecimal(item.getQuantity())))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
-    }
-
-    @Value
-    class RichOrderItem {
-        Book book;
-        int quantity;
     }
 }

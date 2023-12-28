@@ -43,9 +43,9 @@ class OrderController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ResponseEntity<Object> createOrder(@RequestBody CreateOrderCommand createOrderCommand) {
+    public ResponseEntity<Object> createOrder(@RequestBody PlaceOrderCommand placeOrderCommand) {
         return manipulateOrderUseCase
-                .placeOrder(createOrderCommand.toPlaceOrderCommand())
+                .placeOrder(placeOrderCommand)
                 .handle(
                         orderId -> ResponseEntity.created(orderUri(orderId)).build(),
                         error -> ResponseEntity.badRequest().body(error)
@@ -69,40 +69,6 @@ class OrderController {
     @ResponseStatus(NO_CONTENT)
     public void deleteOrder(@PathVariable Long id) {
         queryOrderUseCase.deleteOrderById(id);
-    }
-
-    @Data
-    static class CreateOrderCommand {
-        List<OrderItemCommand> items;
-        RecipientCommand recipient;
-
-        PlaceOrderCommand toPlaceOrderCommand() {
-            List<OrderItem> orderItems = items
-                    .stream()
-                    .map(item -> new OrderItem(item.bookId, item.quantity))
-                    .collect(Collectors.toList());
-            return new PlaceOrderCommand(orderItems, recipient.toRecipient());
-        }
-    }
-
-    @Data
-    static class OrderItemCommand {
-        Long bookId;
-        int quantity;
-    }
-
-    @Data
-    static class RecipientCommand {
-        String name;
-        String phone;
-        String street;
-        String city;
-        String zipCode;
-        String email;
-
-        Recipient toRecipient() {
-            return new Recipient(name, phone, street, city, zipCode, email);
-        }
     }
 
     @Data

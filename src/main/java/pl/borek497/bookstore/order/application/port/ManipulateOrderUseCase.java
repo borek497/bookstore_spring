@@ -1,9 +1,6 @@
 package pl.borek497.bookstore.order.application.port;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
+import lombok.*;
 import pl.borek497.bookstore.commons.Either;
 import pl.borek497.bookstore.order.domain.OrderItem;
 import pl.borek497.bookstore.order.domain.OrderStatus;
@@ -23,8 +20,14 @@ public interface ManipulateOrderUseCase {
     @AllArgsConstructor
     class PlaceOrderCommand {
         @Singular
-        List<OrderItem> items;
+        List<OrderItemCommand> items;
         Recipient recipient;
+    }
+
+    @Value
+    class OrderItemCommand {
+        Long bookId;
+        int quantity;
     }
 
     class PlaceOrderResponse extends Either<String, Long> {

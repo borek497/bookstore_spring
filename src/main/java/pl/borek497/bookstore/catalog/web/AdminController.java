@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase;
+import pl.borek497.bookstore.catalog.application.port.CatalogUseCase.CreateBookCommand;
 import pl.borek497.bookstore.catalog.db.AuthorJpaRepository;
 import pl.borek497.bookstore.catalog.domain.Author;
 import pl.borek497.bookstore.catalog.domain.Book;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase;
+import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.OrderItemCommand;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
 import pl.borek497.bookstore.order.domain.OrderItem;
 import pl.borek497.bookstore.order.domain.Recipient;
@@ -41,18 +43,20 @@ class AdminController {
         authorJpaRepository.save(joshua);
         authorJpaRepository.save(neal);
 
-        CatalogUseCase.CreateBookCommand effectiveJava = new CatalogUseCase.CreateBookCommand(
+        CreateBookCommand effectiveJava = new CreateBookCommand(
                 "Effective Java",
                 Set.of(joshua.getId()),
                 2005,
-                new BigDecimal("79.00")
+                new BigDecimal("79.00"),
+                50L
         );
 
-        CatalogUseCase.CreateBookCommand javaPuzzlers = new CatalogUseCase.CreateBookCommand(
+        CreateBookCommand javaPuzzlers = new CreateBookCommand(
                 "Java Puzzlers",
                 Set.of(joshua.getId(), neal.getId()),
                 2018,
-                new BigDecimal("99.00")
+                new BigDecimal("99.00"),
+                50L
         );
         catalogUseCase.addBook(effectiveJava);
         catalogUseCase.addBook(javaPuzzlers);
@@ -75,8 +79,8 @@ class AdminController {
         ManipulateOrderUseCase.PlaceOrderCommand command = ManipulateOrderUseCase.PlaceOrderCommand
                 .builder()
                 .recipient(recipient)
-                .item(new OrderItem(effectiveJava.getId(), 16))
-                .item(new OrderItem(javaPuzzlers.getId(), 7))
+                .item(new OrderItemCommand(effectiveJava.getId(), 16))
+                .item(new OrderItemCommand(javaPuzzlers.getId(), 7))
                 .build();
 
         ManipulateOrderUseCase.PlaceOrderResponse placeOrderResponse = manipulateOrderUseCase.placeOrder(command);
