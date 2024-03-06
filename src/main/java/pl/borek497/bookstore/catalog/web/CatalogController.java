@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @AllArgsConstructor
 @RestController
 @RequestMapping("/catalog")
@@ -86,7 +88,7 @@ class CatalogController {
     @PutMapping(value = "/{id}/cover", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void addBookCover(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
-        System.out.println("Got file: " + file.getOriginalFilename());
+        log.info("Got file: " + file.getOriginalFilename());
         catalogUseCase.updateBookCover(new UpdateBookCoverCommand(
                 id,
                 file.getBytes(),

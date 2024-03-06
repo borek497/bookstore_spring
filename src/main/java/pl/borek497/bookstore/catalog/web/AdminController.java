@@ -2,6 +2,7 @@ package pl.borek497.bookstore.catalog.web;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,12 +14,12 @@ import pl.borek497.bookstore.catalog.domain.Book;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.OrderItemCommand;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
-import pl.borek497.bookstore.order.domain.OrderItem;
 import pl.borek497.bookstore.order.domain.Recipient;
 
 import java.math.BigDecimal;
 import java.util.Set;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin")
 @AllArgsConstructor
@@ -34,7 +35,7 @@ class AdminController {
     @Transactional
     public void initialize() {
         initData();
-        placeOrder();
+        //placeOrder();
     }
 
     private void initData() {
@@ -88,9 +89,9 @@ class AdminController {
                 orderId -> "Created ORDER with id: " + orderId,
                 error -> "Failed to created order: " + error
         );
-        System.out.println(result);
+        log.info(result);
 
         queryOrderUseCase.findAll()
-                .forEach(order -> System.out.println("Got order with total price: " + order.totalPrice() + " details: " + order));
+                .forEach(order -> log.info("Got order with total price: " + order.totalPrice() + " details: " + order));
     }
 }

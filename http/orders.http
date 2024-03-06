@@ -1,6 +1,9 @@
 ### Initialize Data
 POST http://localhost:8080/admin/data
 
+### Delete data
+DELETE http://localhost:8080
+
 ### Catalog
 GET http://localhost:8080/catalog
 
@@ -15,18 +18,18 @@ Content-Type: application/json
   "items": [
     {
       "bookId": 1,
-      "quantity": 8
+      "quantity": 1
     },
     {
       "bookId": 2,
-      "quantity": 13
+      "quantity": 1
     }
   ],
   "recipient": {
     "name": "John Doe",
     "phone": "123-456-789",
-    "street": "Cwiartki 3/4",
-    "city": "Krakow",
+    "street": "Cwiartki 3/10",
+    "city": "Zakopane",
     "zipCode": "30-150",
     "email": "johndoe@example.org"
   }
@@ -38,5 +41,5 @@ PUT http://localhost:8080/orders/1/status
 Content-Type: application/json
 
 {
-  "status": "SHIPPED"
+  "status": "CANCELED"
 }

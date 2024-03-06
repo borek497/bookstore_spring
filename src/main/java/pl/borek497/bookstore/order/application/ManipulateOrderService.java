@@ -7,9 +7,8 @@ import pl.borek497.bookstore.catalog.db.BookJpaRepository;
 import pl.borek497.bookstore.catalog.domain.Book;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase;
 import pl.borek497.bookstore.order.db.OrderJpaRepository;
-import pl.borek497.bookstore.order.domain.Order;
-import pl.borek497.bookstore.order.domain.OrderItem;
-import pl.borek497.bookstore.order.domain.OrderStatus;
+import pl.borek497.bookstore.order.db.RecipientJpaRepository;
+import pl.borek497.bookstore.order.domain.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +20,7 @@ class ManipulateOrderService implements ManipulateOrderUseCase {
 
     private OrderJpaRepository orderJpaRepository;
     private final BookJpaRepository bookJpaRepository;
+    private final RecipientJpaRepository recipientJpaRepository;
 
     @Override
     public PlaceOrderResponse placeOrder(PlaceOrderCommand placeOrderCommand) {
@@ -32,20 +32,36 @@ class ManipulateOrderService implements ManipulateOrderUseCase {
 
         Order order = Order
                 .builder()
-                .recipient(placeOrderCommand.getRecipient())
+                .recipient(getOrCreateRecipient(placeOrderCommand.getRecipient()))
                 .items(items)
                 .build();
 
         Order save = orderJpaRepository.save(order);
-        bookJpaRepository.saveAll(updateBooks(items));
+        bookJpaRepository.saveAll(reduceBooks(items));
         return PlaceOrderResponse.success(save.getId());
     }
 
-    private Set<Book> updateBooks(Set<OrderItem> items) {
+    private Recipient getOrCreateRecipient(Recipient recipient) {
+        return recipientJpaRepository
+                .findByEmailIgnoreCase(recipient.getEmail())
+                .orElse(recipient);
+    }
+
+    private Set<Book> reduceBooks(Set<OrderItem> items) {
         return items.stream()
                 .map(item -> {
                     Book book = item.getBook();
                     book.setAvailable(book.getAvailable() - item.getQuantity());
+                    return book;
+                })
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Book> revokeBooks(Set<OrderItem> items) {
+        return items.stream()
+                .map(item -> {
+                    Book book = item.getBook();
+                    book.setAvailable(book.getAvailable() + item.getQuantity());
                     return book;
                 })
                 .collect(Collectors.toSet());
@@ -70,7 +86,10 @@ class ManipulateOrderService implements ManipulateOrderUseCase {
     public void updateOrderStatus(Long id, OrderStatus status) {
         orderJpaRepository.findById(id)
                 .ifPresent(order -> {
-                    order.updateStatus(status);
+                    UpdateStatusResult result = order.updateStatus(status);
+                    if (result.isRevoked()) {
+                        bookJpaRepository.saveAll(revokeBooks(order.getItems()));
+                    }
                     orderJpaRepository.save(order);
                 });
     }

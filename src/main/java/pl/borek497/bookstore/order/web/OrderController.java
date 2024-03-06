@@ -9,14 +9,11 @@ import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderCommand;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase.RichOrder;
-import pl.borek497.bookstore.order.domain.OrderItem;
 import pl.borek497.bookstore.order.domain.OrderStatus;
-import pl.borek497.bookstore.order.domain.Recipient;
 import pl.borek497.bookstore.web.CreatedURI;
 
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -58,7 +55,7 @@ class OrderController {
 
     @PutMapping("/{id}/status")
     @ResponseStatus(ACCEPTED)
-    public void updateOrder(@PathVariable Long id, @RequestBody UpdateStatusCommand updateStatusCommand) {
+    public void updateOrderStatus(@PathVariable Long id, @RequestBody UpdateStatusCommand updateStatusCommand) {
         OrderStatus orderStatus = OrderStatus
                 .parseString(updateStatusCommand.status)
                 .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Unknown status: " + updateStatusCommand.status));
