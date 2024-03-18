@@ -4,11 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.borek497.bookstore.catalog.db.BookJpaRepository;
-import pl.borek497.bookstore.catalog.domain.Book;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
 import pl.borek497.bookstore.order.db.OrderJpaRepository;
 import pl.borek497.bookstore.order.domain.Order;
-import pl.borek497.bookstore.order.domain.OrderItem;
 
 import java.util.List;
 import java.util.Optional;
