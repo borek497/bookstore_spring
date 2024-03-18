@@ -8,7 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderCommand;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
-import pl.borek497.bookstore.order.application.port.QueryOrderUseCase.RichOrder;
+import pl.borek497.bookstore.order.application.RichOrder;
 import pl.borek497.bookstore.order.domain.OrderStatus;
 import pl.borek497.bookstore.web.CreatedURI;
 
