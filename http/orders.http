@@ -1,11 +1,11 @@
 ### Initialize Data
-POST http://localhost:8080/admin/data
+POST http://localhost:8080/admin/initialization
 
 ### Delete data
 DELETE http://localhost:8080
 
 ### Catalog
-GET http://localhost:8080/catalog
+GET http://localhost:8080/catalog/1
 
 ###
 GET http://localhost:8080/orders

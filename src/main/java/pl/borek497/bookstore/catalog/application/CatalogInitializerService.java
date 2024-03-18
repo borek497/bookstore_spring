@@ -11,10 +11,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import pl.borek497.bookstore.catalog.application.port.CatalogInitializerUseCase;
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase;
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase.CreateBookCommand;
+import pl.borek497.bookstore.catalog.application.port.CatalogUseCase.UpdateBookCoverCommand;
 import pl.borek497.bookstore.catalog.db.AuthorJpaRepository;
 import pl.borek497.bookstore.catalog.domain.Author;
 import pl.borek497.bookstore.catalog.domain.Book;
@@ -40,6 +44,7 @@ public class CatalogInitializerService implements CatalogInitializerUseCase {
     private final QueryOrderUseCase queryOrderUseCase;
     private final AuthorJpaRepository authorJpaRepository;
     private final CatalogUseCase catalogUseCase;
+    private final RestTemplate restTemplate;
 
     @Override
     @Transactional
@@ -64,7 +69,7 @@ public class CatalogInitializerService implements CatalogInitializerUseCase {
     private void initBook(CsvBook csvBook) {
         Set<Long> authors = Arrays
                 .stream(csvBook.authors.split(","))
-                .filter(StringUtils::isBlank)
+                .filter(StringUtils::isNotBlank)
                 .map(String::trim)
                 .map(this::getOrCreateAuthor)
                 .map(BaseEntity::getId)
@@ -76,8 +81,14 @@ public class CatalogInitializerService implements CatalogInitializerUseCase {
                 csvBook.year,
                 csvBook.amount,
                 50L);
-        catalogUseCase.addBook(command);
-        // upload thumbnail
+        Book book = catalogUseCase.addBook(command);
+        catalogUseCase.updateBookCover(updateBookCoverCommand(book.getId(), csvBook.thumbnail));
+    }
+
+    private UpdateBookCoverCommand updateBookCoverCommand(Long bookId, String thumbnailUrl) {
+        ResponseEntity<byte[]> response = restTemplate.exchange(thumbnailUrl, HttpMethod.GET, null, byte[].class);
+        String contentType = response.getHeaders().getContentType().toString();
+        return new UpdateBookCoverCommand(bookId, response.getBody(), contentType, "cover");
     }
 
     private Author getOrCreateAuthor(String name) {
