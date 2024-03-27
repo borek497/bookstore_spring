@@ -11,6 +11,8 @@ import pl.borek497.bookstore.catalog.domain.Book;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.OrderItemCommand;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderCommand;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderResponse;
+import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
+import pl.borek497.bookstore.order.domain.OrderStatus;
 import pl.borek497.bookstore.order.domain.Recipient;
 
 import java.math.BigDecimal;
@@ -20,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ManipulateOrderServiceTest {
+class OrderServiceTest {
 
     @Autowired
     BookJpaRepository bookJpaRepository;
@@ -30,6 +32,9 @@ class ManipulateOrderServiceTest {
 
     @Autowired
     CatalogUseCase catalogUseCase;
+
+    @Autowired
+    QueryOrderUseCase queryOrderUseCase;
 
     @Test
     public void userCanPlaceOrder() {
@@ -47,8 +52,8 @@ class ManipulateOrderServiceTest {
 
         //then
         assertTrue(response.isSuccess());
-        assertEquals(35L, catalogUseCase.findById(effectiveJava.getId()).get().getAvailable());
-        assertEquals(40L, catalogUseCase.findById(jCip.getId()).get().getAvailable());
+        assertEquals(35L, availableCopiesOf(effectiveJava));
+        assertEquals(40L, availableCopiesOf(jCip));
     }
 
     @Test
@@ -69,6 +74,22 @@ class ManipulateOrderServiceTest {
         assertTrue(exception.getMessage().contains("Too many copies of book " + effectiveJava.getId() + " requested"));
     }
 
+    @Test
+    public void userCanRevokeOrder() {
+        // given
+        Book effectiveJava = givenEffectiveJava(50L);
+        Long orderId = placedOrder(effectiveJava.getId(), 15);
+        assertEquals(35L, availableCopiesOf(effectiveJava));
+
+        // when
+        service.updateOrderStatus(orderId, OrderStatus.CANCELED);
+
+        // then
+        assertEquals(50L, availableCopiesOf(effectiveJava));
+        assertEquals(OrderStatus.CANCELED, queryOrderUseCase.findById(orderId).get().getStatus());
+
+    }
+
     private Book givenEffectiveJava(long available) {
         return bookJpaRepository.save(new Book("Effective Java", 2005, new BigDecimal("199.90"), available));
     }
@@ -81,4 +102,16 @@ class ManipulateOrderServiceTest {
         return Recipient.builder().email("john@example.org").build();
     }
 
+    private Long placedOrder(Long bookId, int copies) {
+        PlaceOrderCommand command = PlaceOrderCommand
+                .builder()
+                .recipient(recipient())
+                .item(new OrderItemCommand(bookId, copies))
+                .build();
+        return service.placeOrder(command).getRight();
+    }
+
+    private Long availableCopiesOf(Book effectiveJava) {
+        return catalogUseCase.findById(effectiveJava.getId()).get().getAvailable();
+    }
 }
