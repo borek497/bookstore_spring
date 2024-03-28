@@ -70,9 +70,15 @@ class ManipulateOrderService implements ManipulateOrderUseCase {
     private OrderItem toOrderItem(OrderItemCommand orderItemCommand) {
         Book book = bookJpaRepository.getOne(orderItemCommand.getBookId());
         int quantity = orderItemCommand.getQuantity();
+
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Cannot place order with 0 or negative quantity");
+        }
+
         if (book.getAvailable() >= quantity) {
             return new OrderItem(book, quantity);
         }
+
         throw new IllegalArgumentException("Too many copies of book " + book.getId() + " requested: "
                 + quantity + " of " + book.getAvailable() + " available");
     }
