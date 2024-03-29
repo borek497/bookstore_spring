@@ -2,6 +2,7 @@ package pl.borek497.bookstore.order.application.port;
 
 import lombok.*;
 import pl.borek497.bookstore.commons.Either;
+import pl.borek497.bookstore.order.domain.Order;
 import pl.borek497.bookstore.order.domain.OrderItem;
 import pl.borek497.bookstore.order.domain.OrderStatus;
 import pl.borek497.bookstore.order.domain.Recipient;
@@ -13,7 +14,7 @@ public interface ManipulateOrderUseCase {
 
     void deleteOrderById(Long id);
 
-    void updateOrderStatus(Long id, OrderStatus status);
+    UpdateStatusResponse updateOrderStatus(UpdateStatusCommand command);
 
     @Builder
     @Value
@@ -30,6 +31,13 @@ public interface ManipulateOrderUseCase {
         int quantity;
     }
 
+    @Value
+    class UpdateStatusCommand {
+        Long orderId;
+        OrderStatus status;
+        String email;
+    }
+
     class PlaceOrderResponse extends Either<String, Long> {
 
         public PlaceOrderResponse(boolean success, String left, Long right) {
@@ -42,6 +50,21 @@ public interface ManipulateOrderUseCase {
 
         public static PlaceOrderResponse failure(String error) {
             return new PlaceOrderResponse(false, error, null);
+        }
+    }
+
+    class UpdateStatusResponse extends Either<String, OrderStatus> {
+
+        public UpdateStatusResponse(boolean success, String left, OrderStatus right) {
+            super(success, left, right);
+        }
+
+        public static UpdateStatusResponse success(OrderStatus orderStatus) {
+            return new UpdateStatusResponse(true, null, orderStatus);
+        }
+
+        public static UpdateStatusResponse failure(String error) {
+            return new UpdateStatusResponse(false, error, null);
         }
     }
 }

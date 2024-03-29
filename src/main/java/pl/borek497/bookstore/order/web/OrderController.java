@@ -7,13 +7,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderCommand;
+import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.UpdateStatusCommand;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
 import pl.borek497.bookstore.order.application.RichOrder;
 import pl.borek497.bookstore.order.domain.OrderStatus;
+import pl.borek497.bookstore.order.domain.UpdateStatusResult;
 import pl.borek497.bookstore.web.CreatedURI;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -55,21 +58,18 @@ class OrderController {
 
     @PutMapping("/{id}/status")
     @ResponseStatus(ACCEPTED)
-    public void updateOrderStatus(@PathVariable Long id, @RequestBody UpdateStatusCommand updateStatusCommand) {
+    public void updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String status = body.get("status");
         OrderStatus orderStatus = OrderStatus
-                .parseString(updateStatusCommand.status)
-                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Unknown status: " + updateStatusCommand.status));
-        manipulateOrderUseCase.updateOrderStatus(id, orderStatus);
+                .parseString(status)
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Unknown status: " + status));
+        UpdateStatusCommand command = new UpdateStatusCommand(id, orderStatus, "admin@example.org");
+        manipulateOrderUseCase.updateOrderStatus(command);
     }
 
     @DeleteMapping
     @ResponseStatus(NO_CONTENT)
     public void deleteOrder(@PathVariable Long id) {
         queryOrderUseCase.deleteOrderById(id);
-    }
-
-    @Data
-    static class UpdateStatusCommand {
-        String status;
     }
 }
