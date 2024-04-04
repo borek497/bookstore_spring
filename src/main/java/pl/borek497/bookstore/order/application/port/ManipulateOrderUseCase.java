@@ -2,10 +2,7 @@ package pl.borek497.bookstore.order.application.port;
 
 import lombok.*;
 import pl.borek497.bookstore.commons.Either;
-import pl.borek497.bookstore.order.domain.Order;
-import pl.borek497.bookstore.order.domain.OrderItem;
-import pl.borek497.bookstore.order.domain.OrderStatus;
-import pl.borek497.bookstore.order.domain.Recipient;
+import pl.borek497.bookstore.order.domain.*;
 
 import java.util.List;
 
@@ -23,6 +20,8 @@ public interface ManipulateOrderUseCase {
         @Singular
         List<OrderItemCommand> items;
         Recipient recipient;
+        @Builder.Default
+        Delivery delivery = Delivery.COURIER;
     }
 
     @Value

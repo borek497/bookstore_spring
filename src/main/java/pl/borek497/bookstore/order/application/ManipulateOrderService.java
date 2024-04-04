@@ -33,6 +33,7 @@ class ManipulateOrderService implements ManipulateOrderUseCase {
         Order order = Order
                 .builder()
                 .recipient(getOrCreateRecipient(placeOrderCommand.getRecipient()))
+                .delivery(placeOrderCommand.getDelivery())
                 .items(items)
                 .build();
 
