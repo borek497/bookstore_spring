@@ -75,7 +75,7 @@ class CatalogController {
         catalogUseCase.removeById(id);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateBook(@PathVariable Long id, @RequestBody RestBookCommand restBookCommand) {
         UpdateBookResponse response = catalogUseCase.updateBook(restBookCommand.toUpdateBookCommand(id));

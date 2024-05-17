@@ -24,6 +24,8 @@ import pl.borek497.bookstore.catalog.domain.Author;
 import pl.borek497.bookstore.catalog.domain.Book;
 import pl.borek497.bookstore.jpa.BaseEntity;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase;
+import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.OrderItemCommand;
+import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderCommand;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
 import pl.borek497.bookstore.order.domain.Recipient;
 
@@ -132,11 +134,11 @@ public class CatalogInitializerService implements CatalogInitializerUseCase {
                 .email("jan@ms.com")
                 .build();
 
-        ManipulateOrderUseCase.PlaceOrderCommand command = ManipulateOrderUseCase.PlaceOrderCommand
+        PlaceOrderCommand command = PlaceOrderCommand
                 .builder()
                 .recipient(recipient)
-                .item(new ManipulateOrderUseCase.OrderItemCommand(effectiveJava.getId(), 16))
-                .item(new ManipulateOrderUseCase.OrderItemCommand(javaPuzzlers.getId(), 7))
+                .item(new OrderItemCommand(effectiveJava.getId(), 16))
+                .item(new OrderItemCommand(javaPuzzlers.getId(), 7))
                 .build();
 
         ManipulateOrderUseCase.PlaceOrderResponse placeOrderResponse = manipulateOrderUseCase.placeOrder(command);
@@ -147,6 +149,6 @@ public class CatalogInitializerService implements CatalogInitializerUseCase {
         log.info(result);
 
         queryOrderUseCase.findAll()
-                .forEach(order -> log.info("Got order with total price: " + order.getFinalPrice() + " details: " + order));
+                .forEach(order -> log.info("Got order with total price: {} details: {}", order.getFinalPrice(), order));
     }
 }
