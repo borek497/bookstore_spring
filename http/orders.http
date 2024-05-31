@@ -5,10 +5,10 @@ POST http://localhost:8080/admin/initialization
 DELETE http://localhost:8080
 
 ### Catalog
-GET http://localhost:8080/catalog/1
+GET http://localhost:8080/orders
 
 ###
-GET http://localhost:8080/orders
+GET http://localhost:8080/orders/2
 
 ### Place order
 POST http://localhost:8080/orders
@@ -17,11 +17,11 @@ Content-Type: application/json
 {
   "items": [
     {
-      "bookId": 1,
-      "quantity": 200
+      "bookId": 26,
+      "quantity": 1
     },
     {
-      "bookId": 2,
+      "bookId": 13,
       "quantity": 1
     }
   ],
