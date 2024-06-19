@@ -26,12 +26,12 @@ Content-Type: application/json
     }
   ],
   "recipient": {
-    "name": "John Doe",
+    "name": "Mat Erna",
     "phone": "123-456-789",
     "street": "Cwiartki 3/10",
     "city": "Zakopane",
     "zipCode": "30-150",
-    "email": "johndoe@example.org"
+    "email": "mateusz@v.com"
   }
 }
 

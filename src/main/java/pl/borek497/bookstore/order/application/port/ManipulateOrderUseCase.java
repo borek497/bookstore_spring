@@ -1,8 +1,12 @@
 package pl.borek497.bookstore.order.application.port;
 
 import lombok.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
 import pl.borek497.bookstore.commons.Either;
-import pl.borek497.bookstore.order.domain.*;
+import pl.borek497.bookstore.order.domain.Delivery;
+import pl.borek497.bookstore.order.domain.OrderStatus;
+import pl.borek497.bookstore.order.domain.Recipient;
 
 import java.util.List;
 
@@ -20,7 +24,7 @@ public interface ManipulateOrderUseCase {
         @Singular
         List<OrderItemCommand> items;
         Recipient recipient;
-        @Builder.Default
+        //@Builder.Default
         Delivery delivery = Delivery.COURIER;
     }
 
@@ -34,7 +38,7 @@ public interface ManipulateOrderUseCase {
     class UpdateStatusCommand {
         Long orderId;
         OrderStatus status;
-        String email;
+        UserDetails user;
     }
 
     class PlaceOrderResponse extends Either<String, Long> {
@@ -52,9 +56,9 @@ public interface ManipulateOrderUseCase {
         }
     }
 
-    class UpdateStatusResponse extends Either<String, OrderStatus> {
+    class UpdateStatusResponse extends Either<Error, OrderStatus> {
 
-        public UpdateStatusResponse(boolean success, String left, OrderStatus right) {
+        public UpdateStatusResponse(boolean success, Error left, OrderStatus right) {
             super(success, left, right);
         }
 
@@ -62,8 +66,17 @@ public interface ManipulateOrderUseCase {
             return new UpdateStatusResponse(true, null, orderStatus);
         }
 
-        public static UpdateStatusResponse failure(String error) {
+        public static UpdateStatusResponse failure(Error error) {
             return new UpdateStatusResponse(false, error, null);
         }
+    }
+
+    @AllArgsConstructor
+    @Getter
+    enum Error {
+        NOT_FOUND(HttpStatus.NOT_FOUND),
+        FORBIDDEN(HttpStatus.FORBIDDEN);
+
+        private final HttpStatus status;
     }
 }

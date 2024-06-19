@@ -49,6 +49,6 @@ class QueryOrderService implements QueryOrderUseCase {
 
     @Override
     public void deleteOrderById(Long id) {
-
+        orderJpaRepository.deleteById(id);
     }
 }

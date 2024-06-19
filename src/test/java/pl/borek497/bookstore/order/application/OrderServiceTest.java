@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.test.annotation.DirtiesContext;
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase;
 import pl.borek497.bookstore.catalog.db.BookJpaRepository;
@@ -15,11 +17,11 @@ import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.Place
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderResponse;
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.UpdateStatusCommand;
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase;
-import pl.borek497.bookstore.order.domain.Delivery;
 import pl.borek497.bookstore.order.domain.OrderStatus;
 import pl.borek497.bookstore.order.domain.Recipient;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.random.RandomGenerator;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -87,7 +89,7 @@ class OrderServiceTest {
         assertEquals(35L, availableCopiesOf(effectiveJava));
 
         // when
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, "admin@example.org");
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, adminUser());
         service.updateOrderStatus(command);
 
         // then
@@ -102,7 +104,7 @@ class OrderServiceTest {
         // given
         Book effectiveJava = givenEffectiveJava(50L);
         Long orderId = placedOrder(effectiveJava.getId(), 15);
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, "marek@example.com");
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, user("marek@example.com"));
 
         // when
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -162,7 +164,7 @@ class OrderServiceTest {
         assertEquals(35L, availableCopiesOf(effectiveJava));
 
         // when
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, "marek@example.com");
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, user("marek@example.com"));
         service.updateOrderStatus(command);
 
         // then
@@ -179,8 +181,7 @@ class OrderServiceTest {
         assertEquals(35L, availableCopiesOf(effectiveJava));
 
         // when
-        String admin = "admin@example.org";
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, admin);
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.CANCELED, adminUser());
         service.updateOrderStatus(command);
 
         // then
@@ -198,7 +199,7 @@ class OrderServiceTest {
 
         // when
         String admin = "admin@example.org";
-        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.PAID, admin);
+        UpdateStatusCommand command = new UpdateStatusCommand(orderId, OrderStatus.PAID, adminUser());
         service.updateOrderStatus(command);
 
         // then
@@ -278,7 +279,7 @@ class OrderServiceTest {
                 .builder()
                 .recipient(recipient(recipient))
                 .item(new OrderItemCommand(bookId, quantity))
-                .delivery(Delivery.COURIER)
+                //.delivery(Delivery.COURIER)
                 .build();
         return service.placeOrder(command).getRight();
     }
@@ -297,5 +298,13 @@ class OrderServiceTest {
 
     private RichOrder orderOf(Long orderId) {
         return queryOrderUseCase.findById(orderId).get();
+    }
+
+    private User user(String email) {
+        return new User(email, "", List.of(new SimpleGrantedAuthority("ROLE_USER")));
+    }
+
+    private User adminUser() {
+        return new User("admin", "", List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
     }
 }
