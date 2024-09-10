@@ -18,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -51,29 +52,21 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers(HttpMethod.GET, "/catalog/**", "/uploads/**", "/authors/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/orders", "/login", "/users").permitAll()
+                                .requestMatchers(HttpMethod.GET,
+                                        "/catalog/**",
+                                        "/uploads/**",
+                                        "/authors/**")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.POST,
+                                        "/orders",
+                                        "/login",
+                                        "/users")
+                                .permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(withDefaults());
         return http.build();
     }
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-//        manager.createUser(User.withDefaultPasswordEncoder()
-//                .username("user")
-//                .password("password")
-//                .roles("USER")
-//                .build());
-//        manager.createUser(User.withDefaultPasswordEncoder()
-//                .username("admin")
-//                .password("admin")
-//                .roles("ADMIN")
-//                .build());
-//        return manager;
-//    }
 
     @Bean
     AuthenticationProvider authenticationProvider() {
@@ -85,8 +78,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @SneakyThrows
