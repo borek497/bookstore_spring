@@ -1,7 +1,12 @@
 import pl.borek497.bookstore.demo.HorsesFarm
+import pl.borek497.bookstore.demo.TooSmallHorsesException
 import pl.borek497.bookstore.users.application.UserService
 import spock.lang.Specification
 
+/**
+ * Spock tests are called Specifications
+ * Don't using any annotations like @Test from JUnit
+ */
 
 class ExampleSpecification extends Specification {
 
@@ -11,11 +16,8 @@ class ExampleSpecification extends Specification {
     }
 
     def "Should demonstrate given-when-then"() {
-        given:
-        var farm = new HorsesFarm(10);
-
         when:
-        int horses = farm.numberOfHorses;
+        int horses = new HorsesFarm(10).getNumberOfHorses()
 
         then:
         horses == 10;
@@ -23,10 +25,10 @@ class ExampleSpecification extends Specification {
 
     def "Should expect exception"() {
         when:
-        new HorsesFarm(0);
+        new HorsesFarm(0)
 
         then:
-        thrown(RuntimeException)
+        thrown(TooSmallHorsesException)
     }
 
     def "Should be able to create horse farm with #horses horses"() {

@@ -2,7 +2,6 @@ package pl.borek497.bookstore.demo;
 
 import lombok.Getter;
 
-
 @Getter
 public class HorsesFarm {
 
@@ -10,7 +9,7 @@ public class HorsesFarm {
 
     public HorsesFarm(int numberOfHorses) {
         if (numberOfHorses <= 10) {
-            throw new RuntimeException("Farm can not be created with less than 10 horses");
+            throw new TooSmallHorsesException();
         }
         this.numberOfHorses = numberOfHorses;
     }
