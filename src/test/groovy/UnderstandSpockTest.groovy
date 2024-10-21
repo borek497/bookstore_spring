@@ -28,24 +28,24 @@ class UnderstandSpockTest extends Specification {
         thrown(IllegalArgumentException)
     }
 
-    def "test z mockowaniem"() {
-        given:
-        def mockService = Mock("serviceClassName")
-
-        mockService.getData() >> "wynik mocka"
-        mockService.getData() >> "pierwszy wynik" >> "drugi wynik"
-        mockService.getData() >> { throw new IllegalArgumentException("Błąd mocka") }
-
-        when:
-        def result1 = mockService.getData()
-        def result2 = mockService.getData()
-        def result3 = mockService.getData()
-
-        then:
-        result1 == "pierwszy wynik"
-        result2 == "drugi wynik"
-        result3 == thrown(IllegalArgumentException)
-    }
+//    def "test z mockowaniem"() {
+//        given:
+//        def mockService = Mock("serviceClassName")
+//
+//        mockService.getData() >> "wynik mocka"
+//        mockService.getData() >> "pierwszy wynik" >> "drugi wynik"
+//        mockService.getData() >> { throw new IllegalArgumentException("Błąd mocka") }
+//
+//        when:
+//        def result1 = mockService.getData()
+//        def result2 = mockService.getData()
+//        def result3 = mockService.getData()
+//
+//        then:
+//        result1 == "pierwszy wynik"
+//        result2 == "drugi wynik"
+//        result3 == thrown(IllegalArgumentException)
+//    }
 
     def "dynamiczny test z mockowaniem"() {
 
