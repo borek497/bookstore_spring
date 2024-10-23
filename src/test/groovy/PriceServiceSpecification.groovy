@@ -15,7 +15,7 @@ class PriceServiceSpecification extends Specification {
     def "should calculate final price value as 0 for empty order"() {
 
         given:
-        Order emptyOrder = Order.builder().build();
+        Order emptyOrder = Order.builder().build()
 
         when:
         OrderPrice emptyOrderPrice = priceService.calculatePrice(emptyOrder)
@@ -44,7 +44,7 @@ class PriceServiceSpecification extends Specification {
         harryChamberPrice.finalPrice() == BigDecimal.valueOf(59.90)
     }
 
-    def "should delivery cost be free for orders equal to or above 100 PLN"() {
+    def "should delivery cost be free for orders equal to or greater than 100 PLN"() {
 
         given:
         Book harryChamberOfSecrets = new Book(
@@ -64,7 +64,7 @@ class PriceServiceSpecification extends Specification {
         harryChamberPrice.finalPrice() == BigDecimal.valueOf(100)
     }
 
-    def "should self pickup cost be free for orders equal to or above 1 PLN"() {
+    def "should self pickup cost be free for orders equal to or greater than 1 PLN"() {
 
         given:
         Book informationLeaflet = new Book(
@@ -84,72 +84,42 @@ class PriceServiceSpecification extends Specification {
         leafletPrice.finalPrice() == BigDecimal.valueOf(1)
     }
 
-    def "should cheapest book in the order be half price"() {
+    def "should cheapest book in the order be half price for when order price equal to or greater than 200 PLN"() {
 
         given:
-        Book southWind = new Book(
-                "Wiatr południa",
-                1998,
-                BigDecimal.valueOf(50.00),
-                20
-        )
-
-        Book northWind = new Book(
-                "Wiatr północy",
-                1998,
-                BigDecimal.valueOf(45.00),
-                20
-        )
-
-        Book westWind = new Book(
-                "Wiatr zachodu",
-                1998,
-                BigDecimal.valueOf(40.00),
-                20
-        )
-
-        Book eastWind = new Book(
-                "Wiatr wschodu",
-                1998,
-                BigDecimal.valueOf(35.00),
-                20
-        )
-        OrderItem southItem = new OrderItem(southWind, 2)
-        OrderItem northItem = new OrderItem(northWind, 2)
-        OrderItem westItem = new OrderItem(westWind, 2)
-        OrderItem eastItem = new OrderItem(eastWind, 2)
-        Set<OrderItem> o = Set.of(southItem, northItem, westItem, eastItem);
-        //Order w = new Order(o, SELF_PICKUP);
-        Order winds = Order.builder().item(o).delivery(SELF_PICKUP).build()
+        Order windBooksOrder = Order.builder().items(prepareOrderAbove200Pln()).delivery(SELF_PICKUP).build()
 
         when:
-        OrderPrice windsPrice = priceService.calculatePrice(winds)
+        OrderPrice windBooksPrice = priceService.calculatePrice(windBooksOrder)
 
         then:
-        windsPrice.finalPrice() == BigDecimal.valueOf(305.00)
-        OrderItem o1 = winds.items.stream()
-                .filter(x -> x.book.getTitle().equals("Wiatr wschodu"))
-                .findFirst()
-        o1.book.getPrice() == BigDecimal(17.50)
+        windBooksPrice.finalPrice() == BigDecimal.valueOf(322.50)
+        priceService.discounts(windBooksOrder) == BigDecimal.valueOf(17.50)
     }
 
-    def "should correct count final price when order price grater than 400 PLN"() {
+    def "should cheapest one book in the order should be free when order price equal to or grater than 400 PLN"() {
         given:
-        Book harryGobletOfFire = new Book(
-                "Harry Potter i Czara Ognia",
-                2000,
-                BigDecimal.valueOf(100.00
-                ),
-                100)
-
-        OrderItem harryGobletOfFireItem = new OrderItem(harryGobletOfFire, 10)
-        Order harryGobletOfFireOrder = Order.builder().item(harryGobletOfFireItem).delivery(COURIER).build();
+        Order windBooksOrder = Order.builder().items(prepareOrderAbove400Pln()).delivery(SELF_PICKUP).build()
 
         when:
-        OrderPrice harryGobletPrice = priceService.calculatePrice(harryGobletOfFireOrder)
+        OrderPrice windBooksPrice = priceService.calculatePrice(windBooksOrder)
 
         then:
-        harryGobletPrice.finalPrice() == BigDecimal.valueOf(900.00)
+        windBooksPrice.finalPrice() == BigDecimal.valueOf(480)
     }
-    //inne testy wyliczania znizki
+
+
+    private Set<OrderItem> prepareOrderAbove200Pln() {
+        OrderItem southItem = new OrderItem(new Book("Wiatr południa", 1998, BigDecimal.valueOf(50.00), 20), 2)
+        OrderItem northItem = new OrderItem(new Book("Wiatr północy", 1998, BigDecimal.valueOf(45.00), 20), 2)
+        OrderItem westItem = new OrderItem(new Book("Wiatr zachodu", 1998, BigDecimal.valueOf(40.00), 20), 2)
+        OrderItem eastItem = new OrderItem(new Book("Wiatr wschodu", 1998, BigDecimal.valueOf(35.00),20), 2)
+        return Set.of(southItem, northItem, westItem, eastItem)
+    }
+
+    private Set<OrderItem> prepareOrderAbove400Pln() {
+        OrderItem floodItem = new OrderItem(new Book("Potop", 1866, BigDecimal.valueOf(100.00), 10), 4)
+        OrderItem dollItem = new OrderItem(new Book("Lalka", 1889, BigDecimal.valueOf(80.00), 5), 2)
+        return Set.of(floodItem, dollItem)
+    }
 }
