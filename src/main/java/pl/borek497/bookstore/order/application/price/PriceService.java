@@ -23,7 +23,7 @@ public class PriceService {
         );
     }
 
-    private BigDecimal discounts(Order order) {
+    public BigDecimal discounts(Order order) {
         return strategies.stream()
                 .map(strategy -> strategy.calculate(order))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
