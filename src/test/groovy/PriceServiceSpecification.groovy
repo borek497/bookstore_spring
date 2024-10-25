@@ -18,7 +18,7 @@ class PriceServiceSpecification extends Specification {
 
     def setup() {
         //this solution will create new, fresh object for each test but only for those in method: testNeeded
-        //using @Shared
+        //don't use @Shared with setup()
         if (testNeedHarryBook()) {
             harryChamberOfSecrets = new Book(
                     "Harry Potter i Komnata tajemnic", 1998, BigDecimal.valueOf(50), 20
@@ -34,7 +34,7 @@ class PriceServiceSpecification extends Specification {
         def currentTestName = specificationContext.currentIteration.name
         return currentTestName in [
                 "should add delivery cost for order lower than 100 PLN",
-                "should delivery cost be free for orders equal to or greater than 100 PLN"
+                "should not apply delivery cost for orders of 100 PLN or more"
         ]
     }
 
@@ -67,7 +67,7 @@ class PriceServiceSpecification extends Specification {
         orderPrice2.finalPrice() == BigDecimal.valueOf(59.90)
     }
 
-    def "should delivery cost be free for orders equal to or greater than 100 PLN"() {
+    def "should not apply delivery cost for orders of 100 PLN or more"() {
 
         given:
         OrderItem orderItem3 = new OrderItem(harryChamberOfSecrets, 2)
@@ -82,7 +82,7 @@ class PriceServiceSpecification extends Specification {
         orderPrice3.finalPrice() == BigDecimal.valueOf(100.00)
     }
 
-    def "should self pickup cost be free for orders equal to or greater than 1 PLN"() {
+    def "should apply free self-pickup for orders over 1 PLN"() {
         given:
         Book informationLeaflet = new Book(
                 "Gmina Wetlina - Informator",
@@ -102,7 +102,7 @@ class PriceServiceSpecification extends Specification {
         leafletPrice.finalPrice() == BigDecimal.valueOf(1)
     }
 
-    def "should cheapest book in the order be half price for when order price equal to or greater than 200 PLN"() {
+    def "should apply half-price discount to cheapest book on 200+ PLN orders"() {
 
         given:
         Order windBooksOrder = Order.builder().items(prepareOrderAbove200Pln()).delivery(SELF_PICKUP).build()
@@ -116,7 +116,7 @@ class PriceServiceSpecification extends Specification {
         windBooksPrice.discounts == BigDecimal.valueOf(17.50)
     }
 
-    def "should cheapest one book in the order should be free when order price equal to or grater than 400 PLN"() {
+    def "should give cheapest book for free on 400+ PLN orders"() {
 
         given:
         Order windBooksOrder = Order.builder().items(prepareOrderAbove400Pln()).delivery(SELF_PICKUP).build()
