@@ -1,4 +1,3 @@
-import org.spockframework.runtime.SpecificationContext
 import pl.borek497.bookstore.catalog.domain.Book
 import pl.borek497.bookstore.order.application.price.OrderPrice
 import pl.borek497.bookstore.order.application.price.PriceService
@@ -13,20 +12,25 @@ import static pl.borek497.bookstore.order.domain.Delivery.SELF_PICKUP
 class PriceServiceSpecification extends Specification {
 
     @Shared
-    PriceService priceService = new PriceService()
+    PriceService priceService
 
-    @Shared
     Book harryChamberOfSecrets
 
     def setup() {
-        if (testNeedSharedObjects()) {
+        //this solution will create new, fresh object for each test but only for those in method: testNeeded
+        //using @Shared
+        if (testNeedHarryBook()) {
             harryChamberOfSecrets = new Book(
                     "Harry Potter i Komnata tajemnic", 1998, BigDecimal.valueOf(50), 20
             )
         }
     }
 
-    boolean testNeedSharedObjects() {
+    def setupSpec() {
+        priceService = new PriceService()
+    }
+
+    boolean testNeedHarryBook() {
         def currentTestName = specificationContext.currentIteration.name
         return currentTestName in [
                 "should add delivery cost for order lower than 100 PLN",
@@ -126,18 +130,17 @@ class PriceServiceSpecification extends Specification {
         windBooksPrice.finalPrice() == BigDecimal.valueOf(480)
     }
 
-
     private Set<OrderItem> prepareOrderAbove200Pln() {
-        OrderItem southItem = new OrderItem(new Book("Wiatr południa", 1998, BigDecimal.valueOf(50.00), 20), 2)
-        OrderItem northItem = new OrderItem(new Book("Wiatr północy", 1998, BigDecimal.valueOf(45.00), 20), 2)
-        OrderItem westItem = new OrderItem(new Book("Wiatr zachodu", 1998, BigDecimal.valueOf(40.00), 20), 2)
-        OrderItem eastItem = new OrderItem(new Book("Wiatr wschodu", 1998, BigDecimal.valueOf(35.00), 20), 2)
-        return Set.of(southItem, northItem, westItem, eastItem)
+        def southItem = new OrderItem(new Book("Wiatr południa", 1998, 50.00G, 20), 2)
+        def northItem = new OrderItem(new Book("Wiatr północy", 1998, 45.00G, 20), 2)
+        def westItem = new OrderItem(new Book("Wiatr zachodu", 1998, 40.00G, 20), 2)
+        def eastItem = new OrderItem(new Book("Wiatr wschodu", 1998, 35.00G, 20), 2)
+        [southItem, northItem, westItem, eastItem] as Set
     }
 
     private Set<OrderItem> prepareOrderAbove400Pln() {
-        OrderItem floodItem = new OrderItem(new Book("Potop", 1866, BigDecimal.valueOf(100.00), 10), 4)
-        OrderItem dollItem = new OrderItem(new Book("Lalka", 1889, BigDecimal.valueOf(80.00), 5), 2)
-        return Set.of(floodItem, dollItem)
+        def floodItem = new OrderItem(new Book("Potop", 1866, 100.00G, 10), 4)
+        def dollItem = new OrderItem(new Book("Lalka", 1889, 80.00G, 5), 2)
+        [floodItem, dollItem] as Set
     }
 }
