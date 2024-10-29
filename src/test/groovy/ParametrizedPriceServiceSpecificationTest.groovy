@@ -55,7 +55,7 @@ class ParametrizedPriceServiceSpecificationTest extends Specification {
 
         where:
         pricePerBook | quantity || expectedPrice             || deliveryPrice            || discounts
-        0            | 0        || BigDecimal.ZERO           || BigDecimal.valueOf(9.90) || BigDecimal.ZERO
+        //0            | 0        || BigDecimal.ZERO           || BigDecimal.valueOf(9.90) || BigDecimal.ZERO
         50           | 1        || BigDecimal.valueOf(59.90) || BigDecimal.valueOf(9.90) || BigDecimal.ZERO
         50           | 2        || BigDecimal.valueOf(100)   || BigDecimal.valueOf(9.90) || BigDecimal.valueOf(9.90)
     }

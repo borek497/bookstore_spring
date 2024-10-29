@@ -39,7 +39,7 @@ class PriceServiceSpecification extends Specification {
     }
 
 
-    def "should calculate final price value as 0 for empty order"() {
+    def "should throw exception for empty order"() {
 
         given:
         Order emptyOrder = Order.builder().build()
@@ -48,8 +48,9 @@ class PriceServiceSpecification extends Specification {
         OrderPrice emptyOrderPrice = priceService.calculatePrice(emptyOrder)
 
         then:
-        emptyOrder.deliveryPrice == BigDecimal.ZERO
-        emptyOrderPrice.finalPrice() == BigDecimal.ZERO
+        def exception = thrown(IllegalStateException)
+        exception.message == "Order has no items"
+        emptyOrderPrice == null
     }
 
     def "should add delivery cost for order lower than 100 PLN"() {
