@@ -16,6 +16,7 @@ public class PriceService {
 
     @Transactional
     public OrderPrice calculatePrice(Order order) {
+        if (order.getItems().isEmpty()) throw new IllegalStateException("Order has no items");
         return new OrderPrice(
                 order.getItemsPrice(),
                 order.getDeliveryPrice(),
