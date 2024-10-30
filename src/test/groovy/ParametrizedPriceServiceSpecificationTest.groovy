@@ -1,7 +1,6 @@
 import pl.borek497.bookstore.catalog.domain.Book
 import pl.borek497.bookstore.order.application.price.OrderPrice
 import pl.borek497.bookstore.order.application.price.PriceService
-import pl.borek497.bookstore.order.domain.Delivery
 import pl.borek497.bookstore.order.domain.Order
 import pl.borek497.bookstore.order.domain.OrderItem
 import spock.lang.Shared
