@@ -61,4 +61,10 @@ public class Order extends BaseEntity {
         }
         return delivery.getPrice();
     }
+
+    public void validateItemsNotEmpty() {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Order with 0 or negative quantity is prohibited");
+        }
+    }
 }

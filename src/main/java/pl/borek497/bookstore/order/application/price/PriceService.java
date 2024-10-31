@@ -16,7 +16,9 @@ public class PriceService {
 
     @Transactional
     public OrderPrice calculatePrice(Order order) {
-        if (order.getItems().isEmpty()) throw new IllegalStateException("Order has no items");
+        if (isItemsQuantityZeroOrNegative(order)) {
+            throw new IllegalArgumentException("Order with 0 or negative quantity is prohibited");
+        }
         return new OrderPrice(
                 order.getItemsPrice(),
                 order.getDeliveryPrice(),
@@ -28,5 +30,9 @@ public class PriceService {
         return strategies.stream()
                 .map(strategy -> strategy.calculate(order))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private boolean isItemsQuantityZeroOrNegative(Order order) {
+        return order.getItems().stream().anyMatch(o -> o.getQuantity() <= 0);
     }
 }
