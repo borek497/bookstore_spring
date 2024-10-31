@@ -17,40 +17,48 @@ class PriceServiceSpecification extends Specification {
     Book harryChamberOfSecrets
 
     def setup() {
-        //this solution will create new, fresh object for each test but only for those in method: testNeeded
-        //don't use @Shared with setup()
-        if (testNeedHarryBook()) {
-            harryChamberOfSecrets = new Book(
-                    "Harry Potter i Komnata tajemnic", 1998, BigDecimal.valueOf(50), 20
-            )
-        }
+        createBookIfNull();
     }
 
     def setupSpec() {
         priceService = new PriceService()
     }
 
-    boolean testNeedHarryBook() {
-        def currentTestName = specificationContext.currentIteration.name
-        return currentTestName in [
-                "should add delivery cost for order lower than 100 PLN",
-                "should not apply delivery cost for orders of 100 PLN or more"
-        ]
+    void createBookIfNull() {
+        if (harryChamberOfSecrets == null) {
+            harryChamberOfSecrets = new Book(
+                    "Harry Potter i Komnata tajemnic", 1998, BigDecimal.valueOf(50), 20)
+        }
     }
 
-
+    //Not PriceServiceTest
     def "should throw exception for empty order"() {
 
         given:
         Order emptyOrder = Order.builder().build()
 
         when:
-        OrderPrice emptyOrderPrice = priceService.calculatePrice(emptyOrder)
+        emptyOrder.validateItemsNotEmpty()
 
         then:
-        def exception = thrown(IllegalStateException)
-        exception.message == "Order has no items"
-        emptyOrderPrice == null
+        def exception = thrown(IllegalArgumentException)
+        exception.message == "Order with 0 or negative quantity is prohibited"
+    }
+
+    //Not PriceServiceTest
+    def "should throw exception when 0 or negative quantity of book"() {
+
+        given:
+        OrderItem harryZeroQuantityItem = new OrderItem(harryChamberOfSecrets, 0)
+        Order harryZeroQuantityOrder = Order.builder().item(harryZeroQuantityItem).delivery(COURIER).build()
+
+        when:
+        OrderPrice harryZeroQuantityPrice = priceService.calculatePrice(harryZeroQuantityOrder)
+
+        then:
+        def exception = thrown(IllegalArgumentException)
+        exception.message == "Order with 0 or negative quantity is prohibited"
+        harryZeroQuantityPrice == null
     }
 
     def "should add delivery cost for order lower than 100 PLN"() {
