@@ -1,20 +1,31 @@
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase
+import pl.borek497.bookstore.catalog.db.AuthorJpaRepository
 import pl.borek497.bookstore.catalog.domain.Author
 import pl.borek497.bookstore.catalog.domain.Book
 import pl.borek497.bookstore.catalog.web.CatalogController
 import spock.lang.Specification
 import spock.lang.Subject
 
-class CatalogSpecificationTest extends Specification {
+@SpringBootTest
+@AutoConfigureTestDatabase
+class CatalogControllerSpecificationTest extends Specification {
 
     def catalogUseCase = Mock(CatalogUseCase)
+    def authorJpaRepository = Mock(AuthorJpaRepository)
 
+    /**
+        Adnotacja opcjonalna, głównie do poprawy czytelności testów gdy kod jest bardziej rozbudowany.
+        Pomocna przy tworzeniu dokumentacji. Można pominąć w prostej Specification
+     */
     @Subject
     def controller = new CatalogController(catalogUseCase)
 
-    def "should return book when book with given id exists"() {
+    def "should return book when given book id exists"() {
+
         given:
         Long bookId = 1L
         Book book = new Book("Harry", 1998, BigDecimal.valueOf(50), 20)
@@ -57,20 +68,42 @@ class CatalogSpecificationTest extends Specification {
         books.containsAll([book1, book2, book3])
     }
 
-    def "should return all books with given author"() {
-        Book book1 = new Book("Potop", 1998, BigDecimal.valueOf(50), 20).addAuthor(new Author("WWW"))
-        Book book2 = new Book("Harry", 1998, BigDecimal.valueOf(50), 20).setAuthors(Set.of("Borek1"))
-        Book book3 = new Book("Harry", 1998, BigDecimal.valueOf(50), 20).setAuthors(Set.of("Borek2"))
-        Book book4 = new Book("Harry Potter", 1998, BigDecimal.valueOf(50), 20).setAuthors(Set.of("Borek2"))
-        Book book5 = new Book("Harry", 1998, BigDecimal.valueOf(50), 20).setAuthors(Set.of("Borek2"))
-        catalogUseCase.findAll() >> [book1, book2, book3, book4, book5]
+    def "should return all books with given title"() {
 
-        when:
-        def books = controller.getAll(Optional.empty(), Optional.of("Borek1"))
+        given:
+
+        Book harryAndChamber = new Book(
+                "Harry Potter i komnata tajemnic",
+                1998,
+                BigDecimal.valueOf(49.99),
+                20
+        )
+
+        Book harryGoblet = new Book(
+                "Harry Potter i czara ognia",
+                1999,
+                BigDecimal.valueOf(49.99),
+                20
+        )
+
+        Book hobbit = new Book(
+                "Hobbit i przyajciele",
+                1988,
+                BigDecimal.valueOf(59.99),
+                20
+        )
+
+        catalogUseCase.findAll() >> [harryAndChamber, harryGoblet, hobbit]
+
+                when:
+
+        def books1 = controller.getAll(Optional.of("Harry"), Optional.empty())
 
         then:
-        books.size() == 2
-        books.containsAll([book1, book2])
+        books1.size() == 2
+        books1.containsAll([harryAndChamber, harryGoblet])
+
+
     }
 
 
