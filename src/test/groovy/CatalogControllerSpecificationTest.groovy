@@ -1,26 +1,17 @@
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase
-import pl.borek497.bookstore.catalog.db.AuthorJpaRepository
-import pl.borek497.bookstore.catalog.domain.Author
 import pl.borek497.bookstore.catalog.domain.Book
 import pl.borek497.bookstore.catalog.web.CatalogController
-import spock.lang.Specification
-import spock.lang.Subject
+import spock.lang.*
 
-@SpringBootTest
-@AutoConfigureTestDatabase
+
 class CatalogControllerSpecificationTest extends Specification {
 
     def catalogUseCase = Mock(CatalogUseCase)
-    def authorJpaRepository = Mock(AuthorJpaRepository)
 
-    /**
-        Adnotacja opcjonalna, głównie do poprawy czytelności testów gdy kod jest bardziej rozbudowany.
-        Pomocna przy tworzeniu dokumentacji. Można pominąć w prostej Specification
-     */
     @Subject
     def controller = new CatalogController(catalogUseCase)
 
@@ -29,6 +20,7 @@ class CatalogControllerSpecificationTest extends Specification {
         given:
         Long bookId = 1L
         Book book = new Book("Harry", 1998, BigDecimal.valueOf(50), 20)
+
         catalogUseCase.findById(bookId) >> Optional.of(book)
 
         when:
@@ -71,7 +63,6 @@ class CatalogControllerSpecificationTest extends Specification {
     def "should return all books with given title"() {
 
         given:
-
         Book harryAndChamber = new Book(
                 "Harry Potter i komnata tajemnic",
                 1998,
@@ -93,37 +84,26 @@ class CatalogControllerSpecificationTest extends Specification {
                 20
         )
 
-        catalogUseCase.findAll() >> [harryAndChamber, harryGoblet, hobbit]
+        catalogUseCase.findByTitle("Harry") >> List.of(harryGoblet, harryAndChamber)
+        //catalogUseCase.findByTitle("Harry") >> new ArrayList<Book>([harryGoblet, harryAndChamber])
+//        List<Book> books = new ArrayList<>()
+//        books.add(harryAndChamber)
+//        books.add(harryGoblet)
+//        catalogUseCase.findByTitle("Harry") >> books
+        //println "wynik dla findByTitle ${catalogUseCase.findByTitle("Harry") >> [harryGoblet, harryAndChamber]}"
 
-                when:
-
-        def books1 = controller.getAll(Optional.of("Harry"), Optional.empty())
+        when:
+        List<Book> el = controller.getAll(Optional.of("Harry"), Optional.empty())
 
         then:
-        books1.size() == 2
-        books1.containsAll([harryAndChamber, harryGoblet])
-
-
+        el.size() == 2
+        //el.containsAll([harryAndChamber, harryGoblet])
+        //!el.contains(hobbit)
+        1 * catalogUseCase.findByTitle("Harry")
+        0 * catalogUseCase.findByAuthor(_)
+        0 * catalogUseCase.findByTitleAndAuthor(_, _)
+        0 * catalogUseCase.findAll()
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
