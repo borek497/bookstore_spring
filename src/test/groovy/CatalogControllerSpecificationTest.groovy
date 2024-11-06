@@ -1,13 +1,14 @@
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase
+import pl.borek497.bookstore.catalog.domain.Author
 import pl.borek497.bookstore.catalog.domain.Book
 import pl.borek497.bookstore.catalog.web.CatalogController
 import spock.lang.Specification
 import spock.lang.Subject
 
 import static java.math.BigDecimal.valueOf
-
 
 class CatalogControllerSpecificationTest extends Specification {
 
@@ -78,5 +79,43 @@ class CatalogControllerSpecificationTest extends Specification {
         books.size() == 2
         books.containsAll([harryAndChamber, harryGoblet])
         !books.contains(hobbit)
+    }
+
+    def "should return empty list when given title does not exist"() {
+
+        when:
+        List<Book> books = controller.getAll(Optional.of("Unknown title"), Optional.empty())
+
+        then:
+        1 * catalogUseCase.findByTitle("Unknown title") >> []
+        books.size() == 0
+    }
+
+    def "should return all books with given author"() {
+
+        given:
+        Author henry = new Author("Henryk Sienkiewicz")
+        henry.setId(bookId)
+
+        Book deluge = new Book("Potop", 1877, new BigDecimal("89.99"), 20)
+
+        when:
+        def books = controller.getAll(Optional.empty(), Optional.of("Sienkiewicz"))
+
+        then:
+        1 * catalogUseCase.findByAuthor("Sienkiewicz") >> [deluge]
+        books.size() == 1
+        books.contains(deluge)
+        books.every {it == deluge} //it == deluge comparing every element with given object -> deluge
+    }
+
+    def "should return empty list when given author does not exist"() {
+
+        when:
+        def books = controller.getAll(Optional.empty(), Optional.of("Unknown author"))
+
+        then:
+        1 * catalogUseCase.findByAuthor("Unknown author") >> []
+        books.size() == 0
     }
 }
