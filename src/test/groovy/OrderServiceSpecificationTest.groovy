@@ -53,11 +53,9 @@ class OrderServiceSpecificationTest extends Specification {
         //expectedURI.toString() == "http://localhost/some/request/uri/orders/123"
         expectedURI.toString() == "/orders/$expectedOrderId"
 
-
         controller.orderUri(expectedOrderId) >> expectedURI
 
         def eitherResponse = new PlaceOrderResponse(true, null, expectedOrderId)
-
 
         when:
         ResponseEntity<Object> response = controller.createOrder(placeOrderCommand)
@@ -67,48 +65,4 @@ class OrderServiceSpecificationTest extends Specification {
         response.statusCode == HttpStatus.CREATED
         response.headers.location == expectedURI
     }
-
-
-
-    def "ServletUriComponentsBuilder mock test"() {//move to other place, just for test
-        given:
-        String uri = "http://localhost/some/request/uri/orders/123"
-
-        URI expectedUri = new URI(uri)
-
-
-        MockHttpServletRequest request = new MockHttpServletRequest()
-        request.setRequestURI(uri)
-
-        // Ustawiamy kontekst żądania, by ServletUriComponentsBuilder mogło z niego skorzystać
-        ServletRequestAttributes attributes = new ServletRequestAttributes(request)
-        RequestContextHolder.setRequestAttributes(attributes)
-
-        // Tworzymy GroovySpy dla ServletUriComponentsBuilder
-        GroovySpy(ServletUriComponentsBuilder, global: true)
-
-        // Mockujemy statyczną metodę fromCurrentRequestUri(), aby zwróciła builder
-        def mockUriComponentsBuilder = Mock(ServletUriComponentsBuilder)
-        mockUriComponentsBuilder.path(_) >> mockUriComponentsBuilder
-        mockUriComponentsBuilder.build() >> expectedUri
-
-        ServletUriComponentsBuilder.fromCurrentRequestUri() >> mockUriComponentsBuilder
-
-        // Tworzymy instancję CreatedURI
-        CreatedURI createdURI = new CreatedURI("/orders/123")
-
-        when:
-        // Wywołanie metody uri() na CreatedURI
-        URI uri2 = createdURI.uri()
-
-        then:
-        // Sprawdzamy, czy zwrócone URI jest zgodne z oczekiwanym
-        uri2.toString() == "http://localhost/some/request/uri/orders/123"
-    }
-
-
-
-
-
-
 }
