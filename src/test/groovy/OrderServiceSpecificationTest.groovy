@@ -1,19 +1,18 @@
-import org.junit.platform.commons.function.Try
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import pl.borek497.bookstore.commons.Either
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase
 import pl.borek497.bookstore.order.domain.Recipient
 import pl.borek497.bookstore.order.web.OrderController
 import pl.borek497.bookstore.security.UserSecurity
+import pl.borek497.bookstore.web.CreatedURI
 import spock.lang.Specification
 
-import java.util.function.Function
-
 import static pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.*
-import static pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.PlaceOrderCommand.*
-
 
 class OrderServiceSpecificationTest extends Specification {
 
@@ -31,28 +30,81 @@ class OrderServiceSpecificationTest extends Specification {
         Recipient recipient = new Recipient("arek@op.pl", "Arek", "123456", "Nowa", "00-987", "Wozy")
 
         PlaceOrderCommand placeOrderCommand = PlaceOrderCommand.builder()
-                .items([orderItemCommand1, orderItemCommand2])
+                .items(List.of(orderItemCommand1, orderItemCommand2))
                 .recipient(recipient)
                 .build()
 
         def expectedOrderId = 123L
-        def expectedUri = URI.create("/orders/${expectedOrderId}")
 
-        and:
-        controller.orderUri(expectedOrderId) >> expectedUri
+        URI expectedURI = new URI("/orders/$expectedOrderId")
 
-        def placeOrderResponse = PlaceOrderResponse.success(expectedOrderId)
+        MockHttpServletRequest request = new MockHttpServletRequest()
+        request.setRequestURI(expectedURI.toString())
+        ServletRequestAttributes attributes = new ServletRequestAttributes(request)
+        RequestContextHolder.setRequestAttributes(attributes)
+        GroovySpy(ServletUriComponentsBuilder, global: true)
+        def mockUriComponentsBuilder = Mock(ServletUriComponentsBuilder)
+        mockUriComponentsBuilder.path(_) >> mockUriComponentsBuilder
+        mockUriComponentsBuilder.build() >> expectedURI
 
-        manipulateOrderUseCase.placeOrder(placeOrderCommand) >> placeOrderResponse
+        ServletUriComponentsBuilder.fromCurrentRequestUri() >> mockUriComponentsBuilder
+        //CreatedURI createdURI = new CreatedURI("/orders/123")
+        //URI uri2 = createdURI.uri()
+        //expectedURI.toString() == "http://localhost/some/request/uri/orders/123"
+        expectedURI.toString() == "/orders/$expectedOrderId"
+
+
+        controller.orderUri(expectedOrderId) >> expectedURI
+
+        def eitherResponse = new PlaceOrderResponse(true, null, expectedOrderId)
+
 
         when:
         ResponseEntity<Object> response = controller.createOrder(placeOrderCommand)
 
         then:
+        1 * manipulateOrderUseCase.placeOrder(placeOrderCommand) >> eitherResponse
         response.statusCode == HttpStatus.CREATED
-        response.headers.location == expectedUri
+        response.headers.location == expectedURI
     }
 
+
+
+    def "ServletUriComponentsBuilder mock test"() {//move to other place, just for test
+        given:
+        String uri = "http://localhost/some/request/uri/orders/123"
+
+        URI expectedUri = new URI(uri)
+
+
+        MockHttpServletRequest request = new MockHttpServletRequest()
+        request.setRequestURI(uri)
+
+        // Ustawiamy kontekst żądania, by ServletUriComponentsBuilder mogło z niego skorzystać
+        ServletRequestAttributes attributes = new ServletRequestAttributes(request)
+        RequestContextHolder.setRequestAttributes(attributes)
+
+        // Tworzymy GroovySpy dla ServletUriComponentsBuilder
+        GroovySpy(ServletUriComponentsBuilder, global: true)
+
+        // Mockujemy statyczną metodę fromCurrentRequestUri(), aby zwróciła builder
+        def mockUriComponentsBuilder = Mock(ServletUriComponentsBuilder)
+        mockUriComponentsBuilder.path(_) >> mockUriComponentsBuilder
+        mockUriComponentsBuilder.build() >> expectedUri
+
+        ServletUriComponentsBuilder.fromCurrentRequestUri() >> mockUriComponentsBuilder
+
+        // Tworzymy instancję CreatedURI
+        CreatedURI createdURI = new CreatedURI("/orders/123")
+
+        when:
+        // Wywołanie metody uri() na CreatedURI
+        URI uri2 = createdURI.uri()
+
+        then:
+        // Sprawdzamy, czy zwrócone URI jest zgodne z oczekiwanym
+        uri2.toString() == "http://localhost/some/request/uri/orders/123"
+    }
 
 
 
