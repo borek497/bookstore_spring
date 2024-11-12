@@ -1,4 +1,5 @@
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
@@ -43,4 +44,32 @@ class ServletUriComponentsBuilderMockTest extends Specification {
         // Sprawdzamy, czy zwrócone URI jest zgodne z oczekiwanym
         uri2.toString() == "http://localhost/some/request/uri/orders/123"
     }
+
+    def "should add Location header with correct URL in response"() {
+        given: "A mocked HTTP request and response"
+        def request = new MockHttpServletRequest("POST", "/orders")
+        request.serverName = "localhost"
+        request.serverPort = 8080
+        request.scheme = "http"
+
+        // Ustawienie request jako bieżący kontekst
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request))
+
+        def response = new MockHttpServletResponse()
+
+        when: "Generating Location URL using ServletUriComponentsBuilder"
+        def orderId = "602"
+        def locationUrl = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .path("/{id}")
+                .buildAndExpand(orderId)
+                .toUriString()
+
+        // Dodanie nagłówka Location do odpowiedzi
+        response.setHeader("Location", locationUrl)
+
+        then: "The Location header should have the correct URL"
+        response.getHeader("Location") == "http://localhost:8080/orders/602"
+    }
 }
+
