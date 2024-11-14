@@ -1,6 +1,5 @@
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase
 import pl.borek497.bookstore.catalog.domain.Author
 import pl.borek497.bookstore.catalog.domain.Book
@@ -9,6 +8,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 
 import static java.math.BigDecimal.valueOf
+import static pl.borek497.bookstore.catalog.web.CatalogController.*
 
 class CatalogControllerSpecificationTest extends Specification {
 
@@ -106,7 +106,7 @@ class CatalogControllerSpecificationTest extends Specification {
         1 * catalogUseCase.findByAuthor("Sienkiewicz") >> [deluge]
         books.size() == 1
         books.contains(deluge)
-        books.every {it == deluge} //it == deluge comparing every element with given object -> deluge
+        books.every { it == deluge } //it == deluge comparing every element with given object -> deluge
     }
 
     def "should return empty list when given author does not exist"() {
@@ -117,5 +117,21 @@ class CatalogControllerSpecificationTest extends Specification {
         then:
         1 * catalogUseCase.findByAuthor("Unknown author") >> []
         books.size() == 0
+    }
+
+    def "should add new book"() {
+
+        given:
+        RestBookCommand restBookCommand = new RestBookCommand(
+                "Become Java dev",
+                Set.of(1L, 2L),
+                2024,
+                1,
+                BigDecimal.valueOf(98.99)
+        )
+
+        when:
+        catalogUseCase.addBook(restBookCommand)
+
     }
 }
