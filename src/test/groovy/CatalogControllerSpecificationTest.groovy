@@ -161,4 +161,28 @@ class CatalogControllerSpecificationTest extends Specification {
         response.statusCode == HttpStatus.CREATED
         response.headers.getLocation().toString() == "http://localhost:8080/books/1"
     }
+
+    def "should return 400 Bad Request if RestBookCommand is invalid"() {
+        given:
+        // Tworzymy niepoprawne dane wejściowe w RestBookCommand
+        def invalidBook = new RestBookCommand(
+                "", // Pusty tytuł
+                Set.of(), // Pusty zbiór
+                0, // Rok wydania 0
+                0, // Brak dostępności
+                BigDecimal.ZERO // Cena 0
+        )
+
+        when:
+        // Wysyłamy żądanie POST do endpointu "/books"
+        def result = mockMvc.perform(
+                MockMvcRequestBuilders.post("/books")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidBook))
+        )
+
+        then:
+        // Oczekujemy, że odpowiedź będzie 400 Bad Request
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest())
+    }
 }
