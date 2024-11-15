@@ -1,5 +1,14 @@
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase
 import pl.borek497.bookstore.catalog.domain.Author
 import pl.borek497.bookstore.catalog.domain.Book
@@ -8,7 +17,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 
 import static java.math.BigDecimal.valueOf
-import static pl.borek497.bookstore.catalog.web.CatalogController.*
+import static pl.borek497.bookstore.catalog.web.CatalogController.RestBookCommand
 
 class CatalogControllerSpecificationTest extends Specification {
 
@@ -21,9 +30,12 @@ class CatalogControllerSpecificationTest extends Specification {
     Book harryGoblet
     Book hobbit
     Long bookId
+    MockMvc mockMvc
+    ObjectMapper objectMapper = new ObjectMapper()
 
     def setup() {
         setupBooks()
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
     }
 
     private void setupBooks() {
@@ -122,16 +134,31 @@ class CatalogControllerSpecificationTest extends Specification {
     def "should add new book"() {
 
         given:
-        RestBookCommand restBookCommand = new RestBookCommand(
-                "Become Java dev",
+        Book becomeJavaDevBook = new Book("Become Java dev",2024, valueOf(89.99), 1)
+        becomeJavaDevBook.setId(1L)
+
+        RestBookCommand becomeJavaDevRest = new RestBookCommand(
+            becomeJavaDevBook.getTitle(),
                 Set.of(1L, 2L),
-                2024,
-                1,
-                BigDecimal.valueOf(98.99)
+                becomeJavaDevBook.getYear(),
+                becomeJavaDevBook.getAvailable(),
+                becomeJavaDevBook.getPrice()
         )
 
-        when:
-        catalogUseCase.addBook(restBookCommand)
+        def requestMock = new MockHttpServletRequest("POST", "/books")
+        requestMock.setServerName("localhost")
+        requestMock.setServerPort(8080)
+        requestMock.setScheme("http")
 
+        def attributes = new ServletRequestAttributes(requestMock)
+        RequestContextHolder.setRequestAttributes(attributes)
+
+        when:
+        ResponseEntity<Void> response = controller.addBook(becomeJavaDevRest)
+
+        then:
+        1 * catalogUseCase.addBook(_) >> becomeJavaDevBook
+        response.statusCode == HttpStatus.CREATED
+        response.headers.getLocation().toString() == "http://localhost:8080/books/1"
     }
 }
