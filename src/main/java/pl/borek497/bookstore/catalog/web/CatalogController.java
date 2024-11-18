@@ -110,7 +110,7 @@ class CatalogController {
 
     @Data
     @AllArgsConstructor
-    private static class RestBookCommand {
+    public static class RestBookCommand {
         @NotBlank(message = "Please provide a title")
         private String title;
 
