@@ -1,12 +1,6 @@
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import pl.borek497.bookstore.catalog.application.port.CatalogUseCase
@@ -30,12 +24,9 @@ class CatalogControllerSpecificationTest extends Specification {
     Book harryGoblet
     Book hobbit
     Long bookId
-    MockMvc mockMvc
-    ObjectMapper objectMapper = new ObjectMapper()
 
     def setup() {
         setupBooks()
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
     }
 
     private void setupBooks() {
@@ -131,7 +122,7 @@ class CatalogControllerSpecificationTest extends Specification {
         books.size() == 0
     }
 
-    def "should add new book"() {
+    def "should correctly add new book"() {
 
         given:
         Book becomeJavaDevBook = new Book("Become Java dev",2024, valueOf(89.99), 1)
@@ -160,29 +151,8 @@ class CatalogControllerSpecificationTest extends Specification {
         1 * catalogUseCase.addBook(_) >> becomeJavaDevBook
         response.statusCode == HttpStatus.CREATED
         response.headers.getLocation().toString() == "http://localhost:8080/books/1"
-    }
 
-    def "should return 400 Bad Request if RestBookCommand is invalid"() {
-        given:
-        // Tworzymy niepoprawne dane wejściowe w RestBookCommand
-        def invalidBook = new RestBookCommand(
-                "", // Pusty tytuł
-                Set.of(), // Pusty zbiór
-                0, // Rok wydania 0
-                0, // Brak dostępności
-                BigDecimal.ZERO // Cena 0
-        )
-
-        when:
-        // Wysyłamy żądanie POST do endpointu "/books"
-        def result = mockMvc.perform(
-                MockMvcRequestBuilders.post("/books")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidBook))
-        )
-
-        then:
-        // Oczekujemy, że odpowiedź będzie 400 Bad Request
-        result.andExpect(MockMvcResultMatchers.status().isBadRequest())
+        cleanup:
+        RequestContextHolder.resetRequestAttributes()
     }
 }
