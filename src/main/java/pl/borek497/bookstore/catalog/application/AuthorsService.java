@@ -14,6 +14,8 @@ class AuthorsService implements AuthorsUseCase {
     private final AuthorJpaRepository authorJpaRepository;
 
     public List<Author> findAll() {
+//        System.out.println("AuthorsService.findAll() called");
+//        System.out.println("Calling authorJpaRepository.findAll()");
         return authorJpaRepository.findAll();
     }
 }
