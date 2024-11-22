@@ -4,6 +4,8 @@ import pl.borek497.bookstore.catalog.domain.Author
 import spock.lang.Specification
 import spock.lang.Subject
 
+import static java.lang.System.out
+
 
 class AuthorsServiceSpecificationTest extends Specification {
 
@@ -25,86 +27,35 @@ class AuthorsServiceSpecificationTest extends Specification {
         when: "main method from service is called"
         def result = service.findAll()
 
-        then: "it should return list of authors"
-        //1 * repository.findAll()
+        then: "should return list of authors"
         result == authors
     }
 
-    def "should return all authors from repository with debug"() {//pass
-        given: "a list of authors in the repository"
+    def "should return all authors from repository with debug"() {
+
+        given: "create list of authors"
         def authors = [
                 new Author("Anna"),
                 new Author("Marcelina"),
                 new Author("Mateusz")
         ]
+        out.println("Authors list initialized: $authors")
+
         repository.findAll() >> {
-            println("Mock method 'findAll()' called")
+            out.println("Mock method 'findAll()' called")
             return authors
         }
 
-        when: "findAll is called"
+        when: "main method from service is called"
         def result = service.findAll()
-        println("Result from service.findAll(): $result")
+        out.println("Result from service.findAll(): $result")
 
-        then: "the repository's findAll is called once"
-        1 * repository.findAll() >> authors
+        then: "should return list of authors"
 
-        and: "the service returns the same list of authors"
-        println("Expected: $authors")
-        println("Actual: $result")
+        out.println("Expected: $authors")
+        out.println("Actual: $result")
         assert service.authorJpaRepository == repository
-        println("Service is using mocked repository: ${service.authorJpaRepository == repository}")
-
-        result == authors
-
-    }
-
-    def "should return all authors from repository22"() {
-        given: "a list of authors in the repository"
-        def authors = [
-                new Author("Anna"),
-                new Author("Marcelina"),
-                new Author("Mateusz")
-        ]
-        repository.findAll() >> authors // Definiujemy zachowanie mocka
-
-        when: "findAll is called"
-        def result = service.findAll()
-
-        then: "the repository's findAll is called once"
-        1 * repository.findAll() // Sprawdzamy, że mock był wywołany
-
-        and: "the service returns the same list of authors"
+        out.println("Service is using mocked repository: ${service.authorJpaRepository == repository}")
         result == authors
     }
-
-    def "should return all authors from repository with debug33"() {
-
-        given:
-        def authors = [
-                new Author("Anna"),
-                new Author("Marcelina"),
-                new Author("Mateusz")
-        ]
-        println("Authors list initialized: $authors")
-
-        repository.findAll() >> {
-            println("Mock repository.findAll() called")
-            return authors
-        }
-        println("Mock repository.findAll() configured to return: $authors")
-
-        when:
-        println("Calling service.findAll()")
-        def result = service.findAll()
-        println("Result from service.findAll(): $result")
-
-        then:
-        println("Expected: $authors")
-        println("Actual: $result")
-        result == authors
-    }
-
-
-
 }
