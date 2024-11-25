@@ -7,6 +7,11 @@ import pl.borek497.bookstore.web.CreatedURI
 import spock.lang.Specification
 
 
+/**
+ * Klasa wykorzystuje GroovySpy.
+ * To narzędzie w Spock, które pozwala na mokowanie/stubowanie obiektów i klas statycznych w Groovy.
+ * Wyjaśnienie w notatkach
+ */
 class ServletUriComponentsBuilderMockTest extends Specification {
 
     def "ServletUriComponentsBuilder mock test"() {
