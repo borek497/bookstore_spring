@@ -7,6 +7,7 @@ import pl.borek497.bookstore.catalog.application.port.CatalogUseCase
 import pl.borek497.bookstore.catalog.domain.Author
 import pl.borek497.bookstore.catalog.domain.Book
 import pl.borek497.bookstore.catalog.web.CatalogController
+import pl.borek497.bookstore.helpers.TextRequestContextHelper
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -147,13 +148,7 @@ class CatalogControllerSpecificationTest extends Specification {
                 becomeJavaDevBook.getPrice()
         )
 
-        def requestMock = new MockHttpServletRequest("POST", "/books")
-        requestMock.setServerName("localhost")
-        requestMock.setServerPort(8080)
-        requestMock.setScheme("http")
-
-        def attributes = new ServletRequestAttributes(requestMock)
-        RequestContextHolder.setRequestAttributes(attributes)
+        TextRequestContextHelper.setRequestContext("/books", "localhost", 8080, "http")
 
         catalogUseCase.addBook(_) >> becomeJavaDevBook
 

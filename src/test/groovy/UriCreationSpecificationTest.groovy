@@ -1,6 +1,7 @@
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import pl.borek497.bookstore.helpers.TextRequestContextHelper
 import pl.borek497.bookstore.web.CreatedURI
 import spock.lang.Specification
 
@@ -13,13 +14,7 @@ class UriCreationSpecificationTest extends Specification {
         def id = 1
         def createdUri = new CreatedURI("/path/$id")
 
-        def requestMock = new MockHttpServletRequest("POST", "/books")
-        requestMock.setServerName("localhost")
-        requestMock.setServerPort(8080)
-        requestMock.setScheme("http")
-
-        def attributes = new ServletRequestAttributes(requestMock)
-        RequestContextHolder.setRequestAttributes(attributes)
+        TextRequestContextHelper.setRequestContext("/books", "localhost", 8080, "http")
 
         when:
         URI result = createdUri.uri()
