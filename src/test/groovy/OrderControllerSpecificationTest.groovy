@@ -1,11 +1,10 @@
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import pl.borek497.bookstore.catalog.domain.Book
-import pl.borek497.bookstore.order.application.ManipulateOrderService
+import pl.borek497.bookstore.helpers.TextRequestContextHelper
 import pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase
 import pl.borek497.bookstore.order.application.port.QueryOrderUseCase
 import pl.borek497.bookstore.order.domain.Recipient
@@ -15,9 +14,14 @@ import spock.lang.Specification
 
 import static pl.borek497.bookstore.order.application.port.ManipulateOrderUseCase.*
 
-class OrderServiceSpecificationTest extends Specification {
-
-    //ToDo - development in progress!!!
+/**
+ * Bez kontekstu Springa.
+ * Test średnio ma sens bo weryfikuje tylko zwracany status oraz budowanie URI.
+ * Testy controllerów nie obejmują pełnej logiki biznesowej a tylko interakcję z Userem:
+ * (przyjmuje dane - przekazuje do serwisów - zwraca odpowiedź)
+ * Logikę testujemy w serwisach
+ */
+class OrderControllerSpecificationTest extends Specification {
 
     def manipulateOrderUseCase = Mock(ManipulateOrderUseCase)
     def queryOrderUseCase = Mock(QueryOrderUseCase)
@@ -29,8 +33,8 @@ class OrderServiceSpecificationTest extends Specification {
 
     def setup() {
         recipient = new Recipient("arek@op.pl", "Arek", "123456", "Nowa", "00-987", "Wozy")
+        TextRequestContextHelper.setRequestContext("/orders", "localhost", 8080, "http")
     }
-
 
     def "user can create new order"() {
 
@@ -44,13 +48,6 @@ class OrderServiceSpecificationTest extends Specification {
                 .build()
 
         def expectedOrderId = 123L
-        def requestMock = new MockHttpServletRequest("POST", "/orders")
-        requestMock.setServerName("localhost")
-        requestMock.setServerPort(8080)
-        requestMock.setScheme("http")
-
-        def attributes = new ServletRequestAttributes(requestMock)
-        RequestContextHolder.setRequestAttributes(attributes)
 
         def eitherResponse = new PlaceOrderResponse(true, null, expectedOrderId)
         manipulateOrderUseCase.placeOrder(placeOrderCommand) >> eitherResponse
